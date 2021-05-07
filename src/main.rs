@@ -3,6 +3,9 @@
 #[macro_use]
 extern crate rocket;
 
+mod entity;
+mod permissions;
+
 #[get("/login")]
 fn login() -> &'static str {
     "Hello, world!"
@@ -14,7 +17,12 @@ fn introspection() -> &'static str {
 }
 
 #[get("/permissions")]
-fn permissions() -> &'static str {
+fn get_permissions() -> &'static str {
+    "Hello, world!"
+}
+
+#[post("/permissions")]
+fn add_permissions() -> &'static str {
     "Hello, world!"
 }
 
@@ -24,7 +32,7 @@ fn get_user_permissions() -> &'static str {
 }
 
 #[post("/user/permissions")]
-fn update_user_permissions() -> &'static str {
+fn add_user_permissions() -> &'static str {
     // Someone who has admin permission
     "Hello, world!"
 }
