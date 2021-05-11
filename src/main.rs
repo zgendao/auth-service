@@ -5,6 +5,7 @@ extern crate rocket;
 
 mod entity;
 mod permissions;
+mod utils;
 
 #[get("/login")]
 fn login() -> &'static str {

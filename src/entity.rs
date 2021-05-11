@@ -6,6 +6,11 @@ struct Entity {
     password: String,
     internal_permissions: Vec<permissions::Internal>,
     permissions: Vec<String>,
+    email: String,
+    email_verified: String,
+    eth_address: String,
+    group_ids: Vec<String>,
+    group_permissions: String,
 }
 
 trait Persistence {
