@@ -1,11 +1,15 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
 #[macro_use]
+extern crate diesel;
+
+#[macro_use]
 extern crate rocket;
 
 mod entity;
 mod permissions;
 mod utils;
+mod schema
 
 #[get("/login")]
 fn login() -> &'static str {
