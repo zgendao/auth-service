@@ -8,5 +8,5 @@ CREATE TABLE users (
     email_verified BOOL NOT NULL DEFAULT false,
     eth_address STRING,
     created_at TIMESTAMP NOT NULL,
-    deleted_at TIMESTAMP,
+    deleted_at TIMESTAMP
 );

@@ -4,5 +4,5 @@ CREATE TABLE groups (
     name STRING NOT NULL,
     description TEXT,
     created_at TIMESTAMP NOT NULL,
-    deleted_at TIMESTAMP,
+    deleted_at TIMESTAMP
 );
