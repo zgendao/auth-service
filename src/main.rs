@@ -6,10 +6,9 @@ extern crate diesel;
 #[macro_use]
 extern crate rocket;
 
-mod entity;
+mod models;
 mod permissions;
 mod utils;
-mod schema
 
 #[get("/login")]
 fn login() -> &'static str {

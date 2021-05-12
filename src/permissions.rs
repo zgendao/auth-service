@@ -1,4 +1,4 @@
-pub (crate) enum Internal {
+pub(crate) enum Internal {
     SetPassword,
     SetPermissions,
     SetInternalPermissions,
@@ -29,6 +29,6 @@ impl Internal {
     }
 }
 
-pub (crate) struct InternalList {
+pub(crate) struct InternalList {
     permissions: Vec<Internal>,
 }

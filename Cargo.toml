@@ -10,4 +10,5 @@ edition = "2018"
 rocket = "0.4.7"
 r2d2-diesel = "1.0.0"
 r2d2 = "0.8.9"
-diesel = { version = "1.4.4", features = ["postgres"] }
+diesel = { version = "1.4.4", features = ["postgres", "uuidv07"] } # uuidv07 refers to uuid crate's version 0.7
+uuid = { version = "0.7", features = ["serde", "v4"] }
