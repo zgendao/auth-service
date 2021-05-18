@@ -48,9 +48,9 @@ fn main() {
             routes![
                 login,
                 introspection,
-                permissions,
+                add_permissions,
                 get_user_permissions,
-                update_user_permissions
+                add_user_permissions
             ],
         )
         .launch();

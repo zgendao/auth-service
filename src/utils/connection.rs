@@ -1,5 +1,4 @@
 use std::env;
-use std::ops::Deref;
 
 use diesel::pg::PgConnection;
 use r2d2;
@@ -16,7 +15,7 @@ pub fn init_pool() -> Pool {
 }
 
 fn database_url() -> String {
-    env::var("DATABASE_URL").unwrap_or_else("salala")
+    env::var("DATABASE_URL").unwrap()
 }
 
 pub struct DbConn(pub r2d2::PooledConnection<ConnectionManager<PgConnection>>);
