@@ -24,6 +24,17 @@ impl Group {
             |group| Ok(group),
         )
     }
+
+    pub fn get_by_name(p_name: String, conn: &PgConnection) -> Result<Group, String> {
+        use crate::models::schema::groups::dsl::*;
+        groups
+            .filter(name.eq(p_name))
+            .first::<Group>(conn)
+            .map_or_else(
+                |_| Err("Group doesn't exist".to_string()),
+                |group| Ok(group),
+            )
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]
@@ -37,6 +48,8 @@ pub struct GroupForm {
 
 impl GroupForm {
     pub fn insert(&self, conn: &PgConnection) -> Group {
+        // TODO overwrite created_at
+        // TODO overwrite deleted_at
         diesel::insert_into(groups::table)
             .values(self)
             .get_result(conn)
@@ -46,8 +59,8 @@ impl GroupForm {
 
 #[cfg(test)]
 mod tests {
-    use super::GroupForm;
     use super::Group;
+    use super::GroupForm;
     use diesel::{pg::PgConnection, prelude::*};
     use std::time::SystemTime;
 
@@ -64,16 +77,16 @@ mod tests {
         };
         let conn = PgConnection::establish(&TEST_DATABASE_URL)
             .expect(&format!("Error connecting to {}", TEST_DATABASE_URL));
-        //let conn = ConnectionManager::<PgConnection>::new(TEST_DATABASE_URL).connect().unwrap();
         let group = g.insert(&conn);
         println!("{:?}", group);
         match Group::get_by_id(group.id.clone(), &conn) {
             Ok(q_group) => {
-                if q_group.id.0.to_string() != group.id.0.to_string() {
-                    panic!("ID should be {}, instead of {}", group.id.0.to_string(), q_group.id.0.to_string())
-                }
+                assert_eq!(q_group.id.0.to_string(), group.id.0.to_string());
+                assert_eq!(q_group.name, group.name);
             }
-            Err(err) => {panic!("{}", err)}
+            Err(err) => {
+                panic!("{}", err)
+            }
         };
     }
 }
