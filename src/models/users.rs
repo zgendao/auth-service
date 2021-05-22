@@ -10,12 +10,9 @@ use crate::models::uuid::Uuid;
 #[table_name = "users"]
 pub struct User {
     pub id: Uuid,
-    pub username: String,
-    pub password: String,
     pub internal_permissions: i8,
-    pub email: Option<String>,
-    pub email_verified: bool,
     pub eth_address: Option<String>,
+    pub signature: Option<String>,
     pub created_at: SystemTime,
     pub deleted_at: Option<SystemTime>,
 }
@@ -49,12 +46,9 @@ impl User {
 #[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]
 #[table_name = "users"]
 pub struct UserForm {
-    pub username: String,
-    pub password: String,
     pub internal_permissions: i8,
-    pub email: Option<String>,
-    pub email_verified: bool,
     pub eth_address: Option<String>,
+    pub signature: Option<String>,
     pub created_at: SystemTime,
     pub deleted_at: Option<SystemTime>,
 }

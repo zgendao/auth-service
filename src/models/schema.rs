@@ -31,12 +31,9 @@ table! {
 table! {
     users (id) {
         id -> Uuid,
-        username -> Text,
-        password -> Text,
         internal_permissions -> Int8,
-        email -> Nullable<Text>,
-        email_verified -> Bool,
         eth_address -> Nullable<Text>,
+        signature -> Nullable<Text>,
         created_at -> Timestamp,
         deleted_at -> Nullable<Timestamp>,
     }
