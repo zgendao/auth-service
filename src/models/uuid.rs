@@ -6,7 +6,7 @@ use diesel::sql_types::Uuid as UuidDiesel;
 use std::io::Write;
 use uuid;
 
-#[derive(Clone, Debug, AsExpression, PartialEq, FromSqlRow, Serialize, Deserialize, Hash, Eq)]
+#[derive(Clone, Debug, AsExpression, PartialEq, FromSqlRow, Serialize, Deserialize, Hash, Eq, Copy)]
 #[sql_type = "UuidDiesel"]
 pub struct Uuid(pub uuid::Uuid);
 

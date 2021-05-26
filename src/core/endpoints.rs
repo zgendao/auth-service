@@ -1,20 +1,35 @@
 use diesel::pg::PgConnection;
+use serde_json;
 
 use crate::core::request;
 use crate::core::response::LoginFailed;
 use crate::models::users;
-use crate::models::users::User;
+use crate::models::user_groups;
 use crate::utils::connection;
+use crate::models::user_groups::UserGroup;
 
-pub(crate) fn login(conn: &PgConnection, login: request::Login) -> &str {
+pub(crate) fn login(conn: &PgConnection, login: request::Login) -> String {
     match users::User::get_by_eth_address(login.eth_address, conn) {
-        Ok(_) => "test",
+        Ok(u) => {
+            match user_groups::UserGroup::get_by_user_id(u.id, &conn) {
+                Ok(uhg) => {
+                    serde_json::to_string(&uhg).unwrap()
+                }
+                Err(err) => {
+                    let l = LoginFailed {
+                        msg: err,
+                        reason_code: "INTERNAL_ERROR".to_string(),
+                    };
+                    serde_json::to_string(&l).unwrap()
+                }
+            }
+        },
         Err(err) => {
             let l = LoginFailed {
                 msg: err,
                 reason_code: "INTERNAL_ERROR".to_string(),
             };
-            "test"
+            serde_json::to_string(&l).unwrap()
         }
     }
 }
