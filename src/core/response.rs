@@ -1,8 +1,9 @@
+use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub(crate) struct LoginSuccess {
-    pub(crate) groups: Vec<Group>,
+    pub(crate) groups: HashMap<String, Group>,
     pub(crate) internal_permissions: Vec<String>,
     pub(crate) eth_address: String,
 }
@@ -10,7 +11,7 @@ pub(crate) struct LoginSuccess {
 #[derive(Serialize, Deserialize, Debug)]
 pub(crate) struct Group {
     pub(crate) name: String,
-    pub(crate) permissions: Vec<Permission>
+    pub(crate) permissions: HashMap<String, Permission>
 }
 
 #[derive(Serialize, Deserialize, Debug)]

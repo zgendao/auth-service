@@ -18,14 +18,14 @@ pub(crate) struct UserResult {
 
 pub(crate) fn user(conn: &PgConnection) -> UserResult {
     let pf = permissions::PermissionForm {
-        name: "".to_string(),
+        name: "NGEN_WRITE".to_string(),
         created_at: SystemTime::now(),
         deleted_at: None,
     };
     let p = pf.insert(conn);
 
     let gf = groups::GroupForm {
-        name: "NGEN_WRITE".to_string(),
+        name: "neurogenesis".to_string(),
         description: Some("Allow to modify neurogenesis".to_string()),
         created_at: SystemTime::now(),
         deleted_at: None,
