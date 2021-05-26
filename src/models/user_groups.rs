@@ -6,14 +6,14 @@ use std::time::SystemTime;
 use crate::models::schema::user_groups;
 use crate::models::uuid::Uuid;
 
-#[derive(Queryable, AsChangeset, Serialize, Debug)]
+#[derive(Queryable, AsChangeset, Serialize, Debug, Clone)]
 #[table_name = "user_groups"]
 pub struct UserGroup {
     pub id: Uuid,
     pub user_id: Uuid,
     pub group_id: Uuid,
     pub permission_id: Uuid,
-    pub created_at: SystemTime,
+    pub created_at: Option<SystemTime>,
     pub deleted_at: Option<SystemTime>,
 }
 
@@ -39,11 +39,10 @@ impl UserGroup {
 #[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]
 #[table_name = "user_groups"]
 pub struct UserGroupForm {
-    pub id: Uuid,
     pub user_id: Uuid,
     pub group_id: Uuid,
     pub permission_id: Uuid,
-    pub created_at: SystemTime,
+    pub created_at: Option<SystemTime>,
     pub deleted_at: Option<SystemTime>,
 }
 

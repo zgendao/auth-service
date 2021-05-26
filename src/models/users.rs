@@ -6,11 +6,11 @@ use std::time::SystemTime;
 use crate::models::schema::users;
 use crate::models::uuid::Uuid;
 
-#[derive(Queryable, AsChangeset, Serialize, Debug)]
+#[derive(Queryable, AsChangeset, Serialize, Debug, Clone)]
 #[table_name = "users"]
 pub struct User {
     pub id: Uuid,
-    pub internal_permissions: i8,
+    pub internal_permissions: i64,
     pub eth_address: Option<String>,
     pub signature: Option<String>,
     pub created_at: SystemTime,
@@ -22,14 +22,6 @@ impl User {
         use crate::models::schema::users::dsl::*;
         users
             .filter(id.eq(p_id))
-            .first::<User>(conn)
-            .map_or_else(|_| Err("User doesn't exist".to_string()), |user| Ok(user))
-    }
-
-    pub fn get_by_username(p_username: String, conn: &PgConnection) -> Result<User, String> {
-        use crate::models::schema::users::dsl::*;
-        users
-            .filter(username.eq(p_username))
             .first::<User>(conn)
             .map_or_else(|_| Err("User doesn't exist".to_string()), |user| Ok(user))
     }
@@ -46,7 +38,7 @@ impl User {
 #[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]
 #[table_name = "users"]
 pub struct UserForm {
-    pub internal_permissions: i8,
+    pub internal_permissions: i64,
     pub eth_address: Option<String>,
     pub signature: Option<String>,
     pub created_at: SystemTime,

@@ -5,3 +5,5 @@ pub(crate) mod users;
 
 pub(crate) mod schema;
 pub(crate) mod uuid;
+
+pub(crate) mod seed;

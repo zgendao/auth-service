@@ -9,10 +9,14 @@ extern crate rocket;
 mod models;
 mod permissions;
 mod utils;
+mod core;
 
-#[get("/login")]
+// #[post("/login", format = "application/json", data = "<login>")]
+//fn login(conn: utils::connection::DbConn, login: core::request::Login) -> &'static str {
+#[post("/login")]
 fn login() -> &'static str {
-    "Hello, world!"
+    //core::endpoints::login(conn.0, login)
+    "Hello"
 }
 
 #[get("/introspection")]
@@ -42,7 +46,9 @@ fn add_user_permissions() -> &'static str {
 }
 
 fn main() {
+    let p = utils::connection::init_pool();
     rocket::ignite()
+        .manage(p)
         .mount(
             "/auth",
             routes![

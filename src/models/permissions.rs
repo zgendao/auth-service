@@ -6,7 +6,7 @@ use std::time::SystemTime;
 use crate::models::schema::permissions;
 use crate::models::uuid::Uuid;
 
-#[derive(Queryable, AsChangeset, Serialize, Debug)]
+#[derive(Queryable, AsChangeset, Serialize, Debug, Clone)]
 #[table_name = "permissions"]
 pub struct Permission {
     pub id: Uuid,

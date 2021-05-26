@@ -6,7 +6,7 @@ use std::time::SystemTime;
 use crate::models::schema::groups;
 use crate::models::uuid::Uuid;
 
-#[derive(Queryable, AsChangeset, Serialize, Debug)]
+#[derive(Queryable, AsChangeset, Serialize, Debug, Clone)]
 #[table_name = "groups"]
 pub struct Group {
     pub id: Uuid,
