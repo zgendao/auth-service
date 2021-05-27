@@ -8,7 +8,6 @@ extern crate rocket;
 
 mod core;
 mod models;
-mod permissions;
 mod utils;
 
 // #[post("/login", format = "application/json", data = "<login>")]
