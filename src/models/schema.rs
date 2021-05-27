@@ -21,8 +21,8 @@ table! {
     tokens (token) {
         token -> Uuid,
         user_id -> Uuid,
-        created_at -> Nullable<Timestamp>,
-        expires_at -> Nullable<Timestamp>,
+        created_at -> Timestamp,
+        expires_at -> Timestamp,
     }
 }
 
@@ -48,4 +48,10 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(groups, permissions, tokens, user_groups, users,);
+allow_tables_to_appear_in_same_query!(
+    groups,
+    permissions,
+    tokens,
+    user_groups,
+    users,
+);

@@ -1,7 +1,7 @@
 #![allow(proc_macro_derive_resolution_fallback)]
 use diesel::{pg::PgConnection, prelude::*, Queryable};
 use serde::{Deserialize, Serialize};
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 
 use crate::models::schema::tokens;
 use crate::models::uuid::Uuid;
@@ -12,49 +12,41 @@ pub struct Token {
     pub token: Uuid,
     pub user_id: Uuid,
     pub created_at: SystemTime,
-    pub expires_at: Option<SystemTime>,
+    pub expires_at: SystemTime,
 }
 
 impl Token {
-    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<Permission, String> {
-        use crate::models::schema::permissions::dsl::*;
-        permissions
-            .filter(id.eq(p_id))
-            .first::<Permission>(conn)
+    pub fn get_by_token(p_token: Uuid, conn: &PgConnection) -> Result<Token, String> {
+        use crate::models::schema::tokens::dsl::*;
+        tokens
+            .filter(token.eq(p_token))
+            .first::<Token>(conn)
             .map_or_else(
-                |_| Err("Permission doesn't exist".to_string()),
-                |permission| Ok(permission),
-            )
-    }
-
-    pub fn get_by_name(p_name: String, conn: &PgConnection) -> Result<Permission, String> {
-        use crate::models::schema::permissions::dsl::*;
-        permissions
-            .filter(name.eq(p_name))
-            .first::<Permission>(conn)
-            .map_or_else(
-                |_| Err("Permission doesn't exist".to_string()),
-                |permission| Ok(permission),
+                |_| Err("Token doesn't exist".to_string()),
+                |t| Ok(t),
             )
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]
-#[table_name = "permissions"]
-pub struct PermissionForm {
-    pub name: String,
+#[table_name = "tokens"]
+pub struct TokenForm {
+    pub user_id: Uuid,
     pub created_at: SystemTime,
-    pub deleted_at: Option<SystemTime>,
+    pub expires_at: SystemTime,
 }
 
-impl PermissionForm {
-    pub fn insert(&self, conn: &PgConnection) -> Permission {
-        // TODO overwrite created_at
-        // TODO overwrite deleted_at
-        diesel::insert_into(permissions::table)
-            .values(self)
+impl TokenForm {
+    pub fn insert(&self, conn: &PgConnection) -> Token {
+        let t = TokenForm {
+            user_id: self.user_id,
+            created_at: SystemTime::now(),
+            expires_at: SystemTime::now().checked_add(Duration::new(10800, 0)).unwrap(),
+        };
+        diesel::insert_into(tokens::table)
+            .values(t)
             .get_result(conn)
-            .expect("error inserting permission")
+            .expect("error inserting tokan")
     }
 }
 

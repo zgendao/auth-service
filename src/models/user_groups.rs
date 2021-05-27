@@ -81,7 +81,7 @@ mod tests {
             user_id,
             group_id,
             permission_id: Uuid::from(uuid::Uuid::new_v4()),
-            created_at: Some(SystemTime::now()),
+            created_at: SystemTime::now(),
             deleted_at: None,
         };
         let conn = PgConnection::establish(&TEST_DATABASE_URL)

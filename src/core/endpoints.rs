@@ -1,18 +1,21 @@
 use diesel::pg::PgConnection;
 use serde_json;
 use std::collections::HashMap;
+use chrono::{DateTime, Utc};
 
 use crate::core::request;
 use crate::core::response;
 use crate::models::groups;
+use crate::models::tokens;
 use crate::models::permissions;
 use crate::models::user_groups;
 use crate::models::user_groups::UserGroup;
 use crate::models::users;
 use crate::utils::connection;
+use std::time::SystemTime;
 
 pub(crate) fn login(conn: &PgConnection, login: request::Login) -> String {
-    match users::User::get_by_eth_address(login.eth_address, conn) {
+    match users::User::get_by_eth_address(login.eth_address.clone(), conn) {
         Ok(u) => match user_groups::UserGroup::get_by_user_id(u.id, &conn) {
             Ok(ug) => {
                 let mut h = HashMap::<String, response::Group>::new();
@@ -38,7 +41,23 @@ pub(crate) fn login(conn: &PgConnection, login: request::Login) -> String {
                         );
                     }
                 }
-                serde_json::to_string(&h).unwrap()
+
+                let token = tokens::TokenForm{
+                    user_id: u.id,
+                    created_at: SystemTime::now(),
+                    expires_at: SystemTime::now()
+                }.insert(&conn);
+                let dt = DateTime::<Utc>::from(token.expires_at);
+                let result = response::LoginSuccess{
+                    groups: h,
+                    internal_permissions: vec![],
+                    eth_address: login.eth_address.clone(),
+                    token: response::Token{
+                        token: token.token.0.to_string(),
+                        expires_at: dt.to_rfc3339(),
+                    },
+                };
+                serde_json::to_string(&result).unwrap()
             }
             Err(err) => {
                 let l = response::LoginFailed {
