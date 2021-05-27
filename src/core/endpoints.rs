@@ -1,78 +1,24 @@
 use diesel::pg::PgConnection;
-use serde_json;
-use std::collections::HashMap;
-use chrono::{DateTime, Utc};
 
 use crate::core::request;
 use crate::core::response;
-use crate::models::groups;
-use crate::models::tokens;
-use crate::models::permissions;
 use crate::models::user_groups;
-use crate::models::user_groups::UserGroup;
 use crate::models::users;
-use crate::utils::connection;
-use std::time::SystemTime;
 
 pub(crate) fn login(conn: &PgConnection, login: request::Login) -> String {
     match users::User::get_by_eth_address(login.eth_address.clone(), conn) {
         Ok(u) => match user_groups::UserGroup::get_by_user_id(u.id, &conn) {
             Ok(ug) => {
-                let mut h = HashMap::<String, response::Group>::new();
-                for ug_elem in ug.iter() {
-                    let g = groups::Group::get_by_id(ug_elem.group_id, &conn).unwrap();
-                    let p =
-                        permissions::Permission::get_by_id(ug_elem.permission_id, &conn).unwrap();
-                    if h.contains_key(&*g.id.0.to_string()) {
-                        let g_mut = h.get_mut(&*g.id.0.to_string()).unwrap();
-                        g_mut
-                            .permissions
-                            .insert(p.id.0.to_string(), response::Permission { name: p.name });
-                    } else {
-                        let mut permissions = HashMap::<String, response::Permission>::new();
-                        permissions
-                            .insert(p.id.0.to_string(), response::Permission { name: p.name });
-                        h.insert(
-                            g.id.0.to_string(),
-                            response::Group {
-                                name: g.name,
-                                permissions,
-                            },
-                        );
-                    }
-                }
-
-                let token = tokens::TokenForm{
-                    user_id: u.id,
-                    created_at: SystemTime::now(),
-                    expires_at: SystemTime::now()
-                }.insert(&conn);
-                let dt = DateTime::<Utc>::from(token.expires_at);
-                let result = response::LoginSuccess{
-                    groups: h,
-                    internal_permissions: vec![],
-                    eth_address: login.eth_address.clone(),
-                    token: response::Token{
-                        token: token.token.0.to_string(),
-                        expires_at: dt.to_rfc3339(),
-                    },
-                };
-                serde_json::to_string(&result).unwrap()
+                let mut result = response::LoginSuccess::new();
+                result.build(conn, ug, login.eth_address.clone(), u.id);
+                result.parse()
             }
             Err(err) => {
-                let l = response::LoginFailed {
-                    msg: err,
-                    reason_code: "INTERNAL_ERROR".to_string(),
-                };
-                serde_json::to_string(&l).unwrap()
+                response::LoginFailed::new(err).parse()
             }
         },
         Err(err) => {
-            let l = response::LoginFailed {
-                msg: err,
-                reason_code: "INTERNAL_ERROR".to_string(),
-            };
-            serde_json::to_string(&l).unwrap()
+            response::LoginFailed::new(err).parse()
         }
     }
 }
