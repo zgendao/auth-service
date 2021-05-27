@@ -4,6 +4,6 @@ CREATE TABLE user_groups (
     user_id UUID NOT NULL,
     group_id UUID NOT NULL,
     permission_id UUID NOT NULL,
-    created_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL,
     deleted_at TIMESTAMP
 );

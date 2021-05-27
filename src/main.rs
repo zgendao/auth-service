@@ -6,10 +6,10 @@ extern crate diesel;
 #[macro_use]
 extern crate rocket;
 
+mod core;
 mod models;
 mod permissions;
 mod utils;
-mod core;
 
 // #[post("/login", format = "application/json", data = "<login>")]
 //fn login(conn: utils::connection::DbConn, login: core::request::Login) -> &'static str {

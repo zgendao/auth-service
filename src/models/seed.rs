@@ -45,7 +45,7 @@ pub(crate) fn user(conn: &PgConnection) -> UserResult {
         user_id: u.clone().id,
         group_id: g.clone().id,
         permission_id: p.clone().id,
-        created_at: Some(SystemTime::now()),
+        created_at: SystemTime::now(),
         deleted_at: None,
     };
     let ug = ugf.insert(conn);

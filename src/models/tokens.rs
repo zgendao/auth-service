@@ -3,19 +3,19 @@ use diesel::{pg::PgConnection, prelude::*, Queryable};
 use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 
-use crate::models::schema::permissions;
+use crate::models::schema::tokens;
 use crate::models::uuid::Uuid;
 
 #[derive(Queryable, AsChangeset, Serialize, Debug, Clone)]
-#[table_name = "permissions"]
-pub struct Permission {
-    pub id: Uuid,
-    pub name: String,
+#[table_name = "tokens"]
+pub struct Token {
+    pub token: Uuid,
+    pub user_id: Uuid,
     pub created_at: SystemTime,
-    pub deleted_at: Option<SystemTime>,
+    pub expires_at: Option<SystemTime>,
 }
 
-impl Permission {
+impl Token {
     pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<Permission, String> {
         use crate::models::schema::permissions::dsl::*;
         permissions

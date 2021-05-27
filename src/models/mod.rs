@@ -1,5 +1,6 @@
 pub(crate) mod groups;
 pub(crate) mod permissions;
+pub(crate) mod tokens;
 pub(crate) mod user_groups;
 pub(crate) mod users;
 
