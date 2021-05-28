@@ -5,9 +5,7 @@ use crate::models::groups;
 use crate::models::permissions;
 use crate::models::user_groups;
 use crate::models::users;
-
-const ETH_ADDRESS: &str = "bf29c02dc4b041895d34b1c63e14c20b";
-const SIGNATURE: &str = "cd8f145c39a27190d6469cc57fad290eddaddb143ef8bddd5b77edd95711f1532764e0b980d68432ab4693eaf5ffbc66faacbb4f365e7ef1db9ddb1d93746f7b";
+use crate::models::tokens;
 
 pub(crate) struct UserResult {
     pub(crate) p: permissions::Permission,
@@ -34,8 +32,8 @@ pub(crate) fn user(conn: &PgConnection) -> UserResult {
 
     let uf = users::UserForm {
         internal_permissions: 12,
-        eth_address: Some(ETH_ADDRESS.to_string()),
-        signature: Some(SIGNATURE.to_string()),
+        eth_address: Some(fakeit::password::generate(true, true, false, 32)),
+        signature: Some(fakeit::password::generate(true, true, false, 127)),
         created_at: SystemTime::now(),
         deleted_at: None,
     };
@@ -51,4 +49,13 @@ pub(crate) fn user(conn: &PgConnection) -> UserResult {
     let ug = ugf.insert(conn);
 
     UserResult { p, g, u, ug }
+}
+
+pub(crate) fn auth_token(conn: &PgConnection, u: UserResult) -> tokens::Token {
+    tokens::TokenForm{
+        token_type: tokens::AUTH_TYPE.to_string(),
+        user_id: u.u.id,
+        created_at: SystemTime::now(),
+        expires_at: SystemTime::now()
+    }.insert(conn)
 }

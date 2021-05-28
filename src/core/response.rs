@@ -5,20 +5,22 @@ use std::collections::HashMap;
 use std::time::SystemTime;
 
 use crate::models::tokens;
+use crate::models::users;
 use crate::models::user_groups;
 use crate::models::uuid;
+use crate::models::seed::user;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct LoginSuccess {
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub(crate) struct User {
     pub(crate) groups: HashMap<String, Group>,
     pub(crate) internal_permissions: Vec<String>,
     pub(crate) eth_address: String,
     pub(crate) token: Token,
 }
 
-impl LoginSuccess {
-    pub(crate) fn new() -> LoginSuccess {
-        LoginSuccess {
+impl User {
+    pub(crate) fn new() -> User {
+        User {
             groups: HashMap::<String, Group>::new(),
             internal_permissions: Vec::<String>::new(),
             eth_address: "".to_string(),
@@ -29,13 +31,13 @@ impl LoginSuccess {
     pub(crate) fn build(
         &mut self,
         conn: &PgConnection,
-        ug: Vec<user_groups::UserGroup>,
-        eth_address: String,
         user_id: uuid::Uuid,
     ) {
+        let ug = user_groups::UserGroup::get_by_user_id(user_id, &conn).unwrap();
+        let u = users::User::get_by_id(user_id, conn).unwrap();
         self.build_groups(conn, ug);
         self.token = Token::new_auth(conn, user_id);
-        self.eth_address = eth_address;
+        self.eth_address = u.eth_address.unwrap();
     }
 
     pub(crate) fn parse(&self) -> String {

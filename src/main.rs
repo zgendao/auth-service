@@ -33,6 +33,14 @@ fn introspection() -> &'static str {
     "Hello, world!"
 }
 
+/// Create registration token endpoint
+///
+/// Creates a registration token for adding new users. Requires `create_user` permission.
+#[post("/register_token")]
+fn register_token() -> &'static str {
+    "Hello"
+}
+
 /// Register endpoint
 ///
 /// Creates a new user in the system, it's done by the register token sent with the register

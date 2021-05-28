@@ -5,6 +5,7 @@ use diesel::sql_types::Uuid as UuidDiesel;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 use uuid;
+use std::str::FromStr;
 
 #[derive(
     Clone, Debug, AsExpression, PartialEq, FromSqlRow, Serialize, Deserialize, Hash, Eq, Copy,
@@ -29,5 +30,11 @@ impl FromSql<UuidDiesel, Pg> for Uuid {
 impl From<uuid::Uuid> for Uuid {
     fn from(uuid: uuid::Uuid) -> Self {
         Uuid(uuid)
+    }
+}
+
+impl From<String> for Uuid {
+    fn from(uuid: String) -> Self {
+        Uuid(uuid::Uuid::from_str(&*uuid).unwrap())
     }
 }
