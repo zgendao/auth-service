@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::SystemTime;
 
+use crate::models::tokens;
 use crate::models::user_groups;
 use crate::models::uuid;
 
@@ -17,7 +18,7 @@ pub(crate) struct LoginSuccess {
 
 impl LoginSuccess {
     pub(crate) fn new() -> LoginSuccess {
-        LoginSuccess{
+        LoginSuccess {
             groups: HashMap::<String, Group>::new(),
             internal_permissions: Vec::<String>::new(),
             eth_address: "".to_string(),
@@ -33,7 +34,7 @@ impl LoginSuccess {
         user_id: uuid::Uuid,
     ) {
         self.build_groups(conn, ug);
-        self.token = Token::new(conn, user_id);
+        self.token = Token::new_auth(conn, user_id);
         self.eth_address = eth_address;
     }
 
@@ -86,21 +87,35 @@ pub(crate) struct Token {
 }
 
 impl Token {
-    pub(crate) fn new( conn: &PgConnection, user_id: uuid::Uuid) -> Token {
-        use crate::models::tokens;
-
-        let token = tokens::TokenForm {
-            user_id,
-            created_at: SystemTime::now(),
-            expires_at: SystemTime::now(),
-        }
-            .insert(conn);
+    pub(crate) fn new_auth(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
+        let token = Token::save_token(conn, user_id, tokens::AUTH_TYPE.to_string());
         let dt = DateTime::<Utc>::from(token.expires_at);
 
         Token {
             token: token.token.0.to_string(),
             expires_at: dt.to_rfc3339(),
         }
+    }
+
+    pub(crate) fn new_register(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
+        let token = Token::save_token(conn, user_id, tokens::REGISTER_TYPE.to_string());
+        let dt = DateTime::<Utc>::from(token.expires_at);
+
+        Token {
+            token: token.token.0.to_string(),
+            expires_at: dt.to_rfc3339(),
+        }
+    }
+
+    fn save_token(conn: &PgConnection, user_id: uuid::Uuid, t: String) -> tokens::Token {
+        let token = tokens::TokenForm {
+            token_type: t,
+            user_id,
+            created_at: SystemTime::now(),
+            expires_at: SystemTime::now(),
+        }
+        .insert(conn);
+        token
     }
 }
 

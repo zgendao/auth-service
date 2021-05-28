@@ -6,10 +6,14 @@ use std::time::{Duration, SystemTime};
 use crate::models::schema::tokens;
 use crate::models::uuid::Uuid;
 
+pub const AUTH_TYPE: &str = "auth";
+pub const REGISTER_TYPE: &str = "register";
+
 #[derive(Queryable, AsChangeset, Serialize, Debug, Clone)]
 #[table_name = "tokens"]
 pub struct Token {
     pub token: Uuid,
+    pub token_type: String,
     pub user_id: Uuid,
     pub created_at: SystemTime,
     pub expires_at: SystemTime,
@@ -31,6 +35,7 @@ impl Token {
 #[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]
 #[table_name = "tokens"]
 pub struct TokenForm {
+    pub token_type: String,
     pub user_id: Uuid,
     pub created_at: SystemTime,
     pub expires_at: SystemTime,
@@ -39,7 +44,8 @@ pub struct TokenForm {
 impl TokenForm {
     pub fn insert(&self, conn: &PgConnection) -> Token {
         let t = TokenForm {
-            user_id: self.user_id,
+            token_type: self.clone().token_type,
+            user_id: self.clone().user_id,
             created_at: SystemTime::now(),
             expires_at: SystemTime::now().checked_add(Duration::new(10800, 0)).unwrap(),
         };

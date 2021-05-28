@@ -20,6 +20,7 @@ table! {
 table! {
     tokens (token) {
         token -> Uuid,
+        token_type -> Text,
         user_id -> Uuid,
         created_at -> Timestamp,
         expires_at -> Timestamp,
