@@ -18,7 +18,7 @@ pub(crate) struct Permissions {
 }
 
 impl Permissions {
-    pub(crate) fn from(f: u64) -> Self {
+    pub(crate) fn from(f: i64) -> Self {
         let mut p = Permissions::default();
         if f & (1 << 1) != 0 {
             p.set_permissions = true;
@@ -70,7 +70,7 @@ impl Permissions {
         p
     }
 
-    pub(crate) fn to_number(&self) -> u64 {
+    pub(crate) fn to_number(&self) -> i64 {
         let mut n = 0;
         if self.set_permissions {
             n = n + (1 << 1);
@@ -126,7 +126,6 @@ impl Permissions {
 #[cfg(test)]
 mod tests {
     use crate::core::internal_permissions;
-    use crate::core::internal_permissions::CREATE_PERMISSIONS;
 
     #[test]
     fn test_permissions_to_number() {

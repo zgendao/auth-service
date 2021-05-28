@@ -4,14 +4,15 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::SystemTime;
 
+use crate::core::internal_permissions;
 use crate::models::tokens;
 use crate::models::users;
 use crate::models::user_groups;
 use crate::models::uuid;
-use crate::models::seed::user;
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub(crate) struct User {
+    pub(crate) user_id: String,
     pub(crate) groups: HashMap<String, Group>,
     pub(crate) internal_permissions: Vec<String>,
     pub(crate) eth_address: String,
@@ -21,6 +22,7 @@ pub(crate) struct User {
 impl User {
     pub(crate) fn new() -> User {
         User {
+            user_id: "".to_string(),
             groups: HashMap::<String, Group>::new(),
             internal_permissions: Vec::<String>::new(),
             eth_address: "".to_string(),
@@ -38,6 +40,8 @@ impl User {
         self.build_groups(conn, ug);
         self.token = Token::new_auth(conn, user_id);
         self.eth_address = u.eth_address.unwrap();
+        self.user_id = u.id.0.to_string();
+        self.internal_permissions = internal_permissions::Permissions::from(u.internal_permissions).to_vec();
     }
 
     pub(crate) fn parse(&self) -> String {
@@ -109,6 +113,10 @@ impl Token {
         }
     }
 
+    pub(crate) fn parse(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
     fn save_token(conn: &PgConnection, user_id: uuid::Uuid, t: String) -> tokens::Token {
         let token = tokens::TokenForm {
             token_type: t,
@@ -122,14 +130,14 @@ impl Token {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct LoginFailed {
+pub(crate) struct Error {
     pub(crate) msg: String,
     pub(crate) reason_code: String,
 }
 
-impl LoginFailed {
-    pub(crate) fn new(err: String) -> LoginFailed {
-        LoginFailed {
+impl Error {
+    pub(crate) fn new(err: String) -> Error {
+        Error {
             msg: err,
             reason_code: "INTERNAL_ERROR".to_string(),
         }
