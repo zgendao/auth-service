@@ -4,9 +4,7 @@ pub const SET_INTERNAL_PERMISSIONS: &str = "set_internal_permissions";
 pub const GET_USERS: &str = "get_users";
 pub const GET_GROUPS: &str = "get_groups";
 pub const CREATE_USER: &str = "create_user";
-
-// TODO add get_permissions
-// TODO add create_user
+pub const GET_PERMISSIONS: &str = "get_permissions";
 
 #[derive(Default)]
 pub(crate) struct Permissions {
@@ -16,6 +14,7 @@ pub(crate) struct Permissions {
     pub(crate) get_users: bool,
     pub(crate) get_groups: bool,
     pub(crate) create_user: bool,
+    pub(crate) get_permissions: bool,
 }
 
 impl Permissions {
@@ -38,6 +37,9 @@ impl Permissions {
         }
         if f & (1 << 6) != 0 {
             p.create_user = true;
+        }
+        if f & (1 << 7) != 0 {
+            p.get_permissions = true;
         }
         p
     }
@@ -62,6 +64,9 @@ impl Permissions {
         if f.contains(&CREATE_USER.to_string()) {
             p.create_user = true;
         }
+        if f.contains(&GET_PERMISSIONS.to_string()) {
+            p.get_permissions = true;
+        }
         p
     }
 
@@ -85,6 +90,9 @@ impl Permissions {
         if self.create_user {
             n = n + (1 << 6);
         }
+        if self.get_permissions {
+            n = n + (1 << 7);
+        }
         n
     }
 
@@ -107,6 +115,9 @@ impl Permissions {
         }
         if self.create_user {
             n.push(CREATE_USER.to_string())
+        }
+        if self.get_permissions {
+            n.push(GET_PERMISSIONS.to_string())
         }
         n
     }
@@ -134,6 +145,7 @@ mod tests {
         assert_eq!(p.get_users, false);
         assert_eq!(p.get_groups, true);
         assert_eq!(p.create_user, false);
+        assert_eq!(p.get_permissions, false);
     }
 
     #[test]
