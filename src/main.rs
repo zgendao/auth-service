@@ -10,6 +10,12 @@ mod core;
 mod models;
 mod utils;
 
+/// Login endpoint
+///
+/// Accept a login request with eth_address and signed message and returns
+/// the user entity with groups and permissions on that group, also add the
+/// internal permissions as well.
+/// Token added what can be used for introspection.
 // #[post("/login", format = "application/json", data = "<login>")]
 //fn login(conn: utils::connection::DbConn, login: core::request::Login) -> &'static str {
 #[post("/login")]
@@ -18,27 +24,55 @@ fn login() -> &'static str {
     "Hello"
 }
 
+/// Introspection endpoint
+///
+/// Accepts a token and validate whether it's an authenticated user or not. Returns details
+/// about the owner of the token like permissions on groups and internal permissions
 #[get("/introspection")]
 fn introspection() -> &'static str {
     "Hello, world!"
 }
 
+/// Register endpoint
+///
+/// Creates a new user in the system, it's done by the register token sent with the register
+/// request. Register token can be created by a user who has `create_user` internal permission.
+#[get("/register")]
+fn register() -> &'static str {
+    "Hello"
+}
+
+/// Get permissions endpoint
+///
+/// Returns the available permissions in the system.
+/// Requires `get_permissions` internal permission.
 #[get("/permissions")]
 fn get_permissions() -> &'static str {
     "Hello, world!"
 }
 
+/// Create permissions endpoint
+///
+/// Creates a new permission in the system.
+/// Requires `create_permissions` internal permission.
 #[post("/permissions")]
 fn add_permissions() -> &'static str {
     "Hello, world!"
 }
 
-#[get("/user/permissions")]
+/// Get user endpoint
+///
+/// TODO
+#[get("/users")]
 fn get_user_permissions() -> &'static str {
     "Hello, world!"
 }
 
-#[post("/user/permissions")]
+/// Add permission to user in group endpoint
+///
+/// Adds a certain permission to the user in a certain group. Requires `set_permissions` internal
+/// permission.
+#[post("/users/permissions")]
 fn add_user_permissions() -> &'static str {
     // Someone who has admin permission
     "Hello, world!"

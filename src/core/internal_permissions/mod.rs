@@ -1,23 +1,28 @@
-pub const SET_PASSWORDS: &str = "set_passwords";
+pub const SET_PERMISSIONS: &str = "set_permissions";
 pub const CREATE_PERMISSIONS: &str = "create_permissions";
 pub const SET_INTERNAL_PERMISSIONS: &str = "set_internal_permissions";
 pub const GET_USERS: &str = "get_users";
 pub const GET_GROUPS: &str = "get_groups";
+pub const CREATE_USER: &str = "create_user";
+
+// TODO add get_permissions
+// TODO add create_user
 
 #[derive(Default)]
 pub(crate) struct Permissions {
-    pub(crate) set_passwords: bool,
+    pub(crate) set_permissions: bool,
     pub(crate) create_permissions: bool,
     pub(crate) set_internal_permissions: bool,
     pub(crate) get_users: bool,
     pub(crate) get_groups: bool,
+    pub(crate) create_user: bool,
 }
 
 impl Permissions {
     pub(crate) fn from(f: u64) -> Self {
         let mut p = Permissions::default();
         if f & (1 << 1) != 0 {
-            p.set_passwords = true;
+            p.set_permissions = true;
         }
         if f & (1 << 2) != 0 {
             p.create_permissions = true;
@@ -31,13 +36,16 @@ impl Permissions {
         if f & (1 << 5) != 0 {
             p.get_groups = true;
         }
+        if f & (1 << 6) != 0 {
+            p.create_user = true;
+        }
         p
     }
 
     pub(crate) fn from_vec(f: Vec<String>) -> Self {
         let mut p = Permissions::default();
-        if f.contains(&SET_PASSWORDS.to_string()) {
-            p.set_passwords = true;
+        if f.contains(&SET_PERMISSIONS.to_string()) {
+            p.set_permissions = true;
         }
         if f.contains(&CREATE_PERMISSIONS.to_string()) {
             p.create_permissions = true;
@@ -51,12 +59,15 @@ impl Permissions {
         if f.contains(&GET_GROUPS.to_string()) {
             p.get_groups = true;
         }
+        if f.contains(&CREATE_USER.to_string()) {
+            p.create_user = true;
+        }
         p
     }
 
-    pub(crate) fn to_number(self) -> u64 {
+    pub(crate) fn to_number(&self) -> u64 {
         let mut n = 0;
-        if self.set_passwords {
+        if self.set_permissions {
             n = n + (1 << 1);
         }
         if self.create_permissions {
@@ -71,13 +82,16 @@ impl Permissions {
         if self.get_groups {
             n = n + (1 << 5);
         }
+        if self.create_user {
+            n = n + (1 << 6);
+        }
         n
     }
 
-    pub(crate) fn to_vec(self) -> Vec<String> {
+    pub(crate) fn to_vec(&self) -> Vec<String> {
         let mut n = Vec::<String>::new();
-        if self.set_passwords {
-            n.push(SET_PASSWORDS.to_string())
+        if self.set_permissions {
+            n.push(SET_PERMISSIONS.to_string())
         }
         if self.create_permissions {
             n.push(CREATE_PERMISSIONS.to_string())
@@ -90,6 +104,9 @@ impl Permissions {
         }
         if self.get_groups {
             n.push(GET_GROUPS.to_string())
+        }
+        if self.create_user {
+            n.push(CREATE_USER.to_string())
         }
         n
     }
@@ -111,11 +128,12 @@ mod tests {
     #[test]
     fn test_permissions_from() {
         let p = internal_permissions::Permissions::from(36);
-        assert_eq!(p.set_passwords, false);
+        assert_eq!(p.set_permissions, false);
         assert_eq!(p.create_permissions, true);
         assert_eq!(p.set_internal_permissions, false);
         assert_eq!(p.get_users, false);
         assert_eq!(p.get_groups, true);
+        assert_eq!(p.create_user, false);
     }
 
     #[test]
@@ -131,7 +149,7 @@ mod tests {
         assert_eq!(v, v_p);
 
         let p = internal_permissions::Permissions::from_vec(v_p);
-        assert_eq!(p.set_passwords, false);
+        assert_eq!(p.set_permissions, false);
         assert_eq!(p.create_permissions, true);
         assert_eq!(p.set_internal_permissions, false);
         assert_eq!(p.get_users, false);
