@@ -121,6 +121,18 @@ impl Permissions {
         }
         n
     }
+
+    pub(crate) fn max() -> i64 {
+        Permissions{
+            set_permissions: true,
+            create_permissions: true,
+            set_internal_permissions: true,
+            get_users: true,
+            get_groups: true,
+            create_user: true,
+            get_permissions: true
+        }.to_number()
+    }
 }
 
 #[cfg(test)]

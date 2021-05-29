@@ -1,4 +1,5 @@
 use diesel::pg::PgConnection;
+use std::env;
 
 use crate::core::internal_permissions;
 use crate::core::request;
@@ -6,6 +7,9 @@ use crate::core::response;
 use crate::models::tokens;
 use crate::models::users;
 use crate::models::uuid::Uuid;
+use std::env::VarError;
+use crate::models::tokens::Token;
+use std::time::SystemTime;
 
 pub(crate) fn login(conn: &PgConnection, login: request::Login) -> String {
     match users::User::get_by_eth_address(login.eth_address.clone(), conn) {
@@ -32,6 +36,45 @@ pub(crate) fn register_token(conn: &PgConnection, token: String) -> String {
         return response::Token::new_register(conn, Uuid::from(user.user_id)).parse();
     }
     response::Error::new("forbidden (CREATE_USER)".to_string()).parse()
+}
+
+pub(crate) fn register(conn: &PgConnection, register: request::Register) -> String  {
+    let admin_account = match env::var("ADMIN_ACCOUNT") {
+        Ok(v) => {v}
+        Err(_) => {"".to_string()}
+    };
+    if admin_account != register.eth_address {
+        let token = match tokens::Token::get_by_token(Uuid::from(register.register_token), conn){
+            Ok(t) => t,
+            Err(_) => {
+                return response::Error::new("token not existing".to_string()).parse();
+            }
+        };
+        if token.token_type != tokens::REGISTER_TYPE {
+            return response::Error::new("token must be registration token".to_string()).parse();
+        }
+        if token.expires_at.lt(&SystemTime::now()) {
+            return response::Error::new("token expired".to_string()).parse();
+        }
+    }
+    // TODO remove register token after use
+
+    let mut u = users::UserForm{
+        internal_permissions: 0,
+        eth_address: Some(register.eth_address),
+        signature: Some(register.signature),
+        created_at: SystemTime::now(),
+        deleted_at: None
+    };
+
+    if admin_account == register.eth_address {
+        u.internal_permissions = internal_permissions::Permissions::max();
+    }
+
+    let saved_u = u.insert(conn);
+    let mut response_u = response::User::new();
+    response_u.build(conn, saved_u.id);
+    response_u.parse()
 }
 
 fn introspection_base(conn: &PgConnection, token: String) -> response::User {
