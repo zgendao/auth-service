@@ -32,8 +32,9 @@ impl Token {
     }
 
     pub fn delete(&self, conn: &PgConnection) -> Result<(), String> {
-        use crate::models::schema::tokens::dsl::token as token_field;
-        diesel::delete(token_field.filter(token_field.eq(self.token))).execute(conn).unwrap();
+        use crate::models::schema::tokens::dsl::*;
+        diesel::delete(tokens
+            .filter(token.eq(self.token))).execute(conn).unwrap();
         Ok(())
     }
 }
