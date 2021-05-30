@@ -165,6 +165,11 @@ mod tests {
             },
         )
         .unwrap();
+
+        // CREATE group
+        // CREATE 3 persmissions
+        // add user to group with permissions
+        // add internal permissions to user
     }
 
     #[test]

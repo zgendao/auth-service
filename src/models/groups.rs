@@ -48,10 +48,14 @@ pub struct GroupForm {
 
 impl GroupForm {
     pub fn insert(&self, conn: &PgConnection) -> Group {
-        // TODO overwrite created_at
-        // TODO overwrite deleted_at
+        let g = GroupForm{
+            name: self.clone().name,
+            description: self.clone().description,
+            created_at: SystemTime::now(),
+            deleted_at: None
+        };
         diesel::insert_into(groups::table)
-            .values(self)
+            .values(g)
             .get_result(conn)
             .expect("error inserting group")
     }

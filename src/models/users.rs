@@ -47,10 +47,15 @@ pub struct UserForm {
 
 impl UserForm {
     pub fn insert(&self, conn: &PgConnection) -> User {
-        // TODO overwrite created_at
-        // TODO overwrite deleted_at
+        let u = UserForm {
+            internal_permissions: 0,
+            eth_address: self.clone().eth_address,
+            signature: self.clone().signature,
+            created_at: SystemTime::now(),
+            deleted_at: None,
+        };
         diesel::insert_into(users::table)
-            .values(self)
+            .values(u)
             .get_result(conn)
             .expect("error inserting user")
     }

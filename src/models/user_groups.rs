@@ -53,10 +53,15 @@ pub struct UserGroupForm {
 
 impl UserGroupForm {
     pub fn insert(&self, conn: &PgConnection) -> UserGroup {
-        // TODO overwrite created_at
-        // TODO overwrite deleted_at
+        let ug = UserGroupForm {
+            user_id: self.clone().user_id,
+            group_id: self.clone().group_id,
+            permission_id: self.clone().permission_id,
+            created_at: SystemTime::now(),
+            deleted_at: None,
+        };
         diesel::insert_into(user_groups::table)
-            .values(self)
+            .values(ug)
             .get_result(conn)
             .expect("error inserting user_groups")
     }

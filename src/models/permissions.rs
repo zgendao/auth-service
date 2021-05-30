@@ -49,8 +49,11 @@ pub struct PermissionForm {
 
 impl PermissionForm {
     pub fn insert(&self, conn: &PgConnection) -> Permission {
-        // TODO overwrite created_at
-        // TODO overwrite deleted_at
+        let p = PermissionForm {
+            name: self.clone().name,
+            created_at: SystemTime::now(),
+            deleted_at: None,
+        };
         diesel::insert_into(permissions::table)
             .values(self)
             .get_result(conn)
