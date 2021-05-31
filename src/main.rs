@@ -35,7 +35,7 @@ fn introspection() -> &'static str {
 
 /// Create registration token endpoint
 ///
-/// Creates a registration token for adding new users. Requires `create_user` permission.
+/// Creates a registration token for adding new users. Requires `manage_user` permission.
 #[post("/register_token")]
 fn register_token() -> &'static str {
     "Hello"
@@ -44,7 +44,7 @@ fn register_token() -> &'static str {
 /// Register endpoint
 ///
 /// Creates a new user in the system, it's done by the register token sent with the register
-/// request. Register token can be created by a user who has `create_user` internal permission.
+/// request. Register token can be created by a user who has `manage_user` internal permission.
 #[get("/register")]
 fn register() -> &'static str {
     "Hello"
@@ -62,7 +62,7 @@ fn get_permissions() -> &'static str {
 /// Create permissions endpoint
 ///
 /// Creates a new permission in the system.
-/// Requires `create_permissions` internal permission.
+/// Requires `manage_permissions` internal permission.
 #[post("/permissions")]
 fn add_permissions() -> &'static str {
     "Hello, world!"
@@ -78,7 +78,7 @@ fn get_user_permissions() -> &'static str {
 
 /// Add permission to user in group endpoint
 ///
-/// Adds a certain permission to the user in a certain group. Requires `set_permissions` internal
+/// Adds a certain permission to the user in a certain group. Requires `manage_permissions` internal
 /// permission.
 #[post("/users/permissions")]
 fn add_user_permissions() -> &'static str {

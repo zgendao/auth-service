@@ -55,7 +55,7 @@ impl PermissionForm {
             deleted_at: None,
         };
         diesel::insert_into(permissions::table)
-            .values(self)
+            .values(p)
             .get_result(conn)
             .expect("error inserting permission")
     }

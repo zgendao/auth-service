@@ -4,12 +4,9 @@ use std::env;
 use crate::core::internal_permissions;
 use crate::core::request;
 use crate::core::response;
-use crate::core::response::{Error, User};
 use crate::models::tokens;
-use crate::models::tokens::Token;
 use crate::models::users;
 use crate::models::uuid::Uuid;
-use std::env::VarError;
 use std::time::SystemTime;
 
 pub(crate) fn login(conn: &PgConnection, login: request::Login) -> String {
@@ -67,14 +64,14 @@ fn register_token_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .contains(&internal_permissions::CREATE_USER.to_string())
+        .contains(&internal_permissions::MANAGE_USERS.to_string())
     {
         return Ok(response::Token::new_register(
             conn,
             Uuid::from(user.user_id),
         ));
     }
-    Err(response::Error::new("forbidden (CREATE_USER)".to_string()))
+    Err(response::Error::new("forbidden (MANAGE_USER)".to_string()))
 }
 
 pub(crate) fn register(conn: &PgConnection, register: request::Register) -> String {
