@@ -49,10 +49,4 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(
-    groups,
-    permissions,
-    tokens,
-    user_groups,
-    users,
-);
+allow_tables_to_appear_in_same_query!(groups, permissions, tokens, user_groups, users,);

@@ -4,8 +4,8 @@ use diesel::serialize::{self, IsNull, Output, ToSql};
 use diesel::sql_types::Uuid as UuidDiesel;
 use serde::{Deserialize, Serialize};
 use std::io::Write;
-use uuid;
 use std::str::FromStr;
+use uuid;
 
 #[derive(
     Clone, Debug, AsExpression, PartialEq, FromSqlRow, Serialize, Deserialize, Hash, Eq, Copy,

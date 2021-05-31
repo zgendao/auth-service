@@ -25,16 +25,14 @@ impl Token {
         tokens
             .filter(token.eq(p_token))
             .first::<Token>(conn)
-            .map_or_else(
-                |_| Err("Token doesn't exist".to_string()),
-                |t| Ok(t),
-            )
+            .map_or_else(|_| Err("Token doesn't exist".to_string()), |t| Ok(t))
     }
 
     pub fn delete(&self, conn: &PgConnection) -> Result<(), String> {
         use crate::models::schema::tokens::dsl::*;
-        diesel::delete(tokens
-            .filter(token.eq(self.token))).execute(conn).unwrap();
+        diesel::delete(tokens.filter(token.eq(self.token)))
+            .execute(conn)
+            .unwrap();
         Ok(())
     }
 }
@@ -54,7 +52,9 @@ impl TokenForm {
             token_type: self.clone().token_type,
             user_id: self.clone().user_id,
             created_at: SystemTime::now(),
-            expires_at: SystemTime::now().checked_add(Duration::new(10800, 0)).unwrap(),
+            expires_at: SystemTime::now()
+                .checked_add(Duration::new(10800, 0))
+                .unwrap(),
         };
         diesel::insert_into(tokens::table)
             .values(t)

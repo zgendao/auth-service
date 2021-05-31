@@ -48,11 +48,11 @@ pub struct GroupForm {
 
 impl GroupForm {
     pub fn insert(&self, conn: &PgConnection) -> Group {
-        let g = GroupForm{
+        let g = GroupForm {
             name: self.clone().name,
             description: self.clone().description,
             created_at: SystemTime::now(),
-            deleted_at: None
+            deleted_at: None,
         };
         diesel::insert_into(groups::table)
             .values(g)

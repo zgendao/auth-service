@@ -6,8 +6,8 @@ use std::time::SystemTime;
 
 use crate::core::internal_permissions;
 use crate::models::tokens;
-use crate::models::users;
 use crate::models::user_groups;
+use crate::models::users;
 use crate::models::uuid;
 
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -30,18 +30,15 @@ impl User {
         }
     }
 
-    pub(crate) fn build(
-        &mut self,
-        conn: &PgConnection,
-        user_id: uuid::Uuid,
-    ) {
+    pub(crate) fn build(&mut self, conn: &PgConnection, user_id: uuid::Uuid) {
         let ug = user_groups::UserGroup::get_by_user_id(user_id, &conn).unwrap();
         let u = users::User::get_by_id(user_id, conn).unwrap();
         self.build_groups(conn, ug);
         self.token = Token::new_auth(conn, user_id);
         self.eth_address = u.eth_address.unwrap();
         self.user_id = u.id.0.to_string();
-        self.internal_permissions = internal_permissions::Permissions::from(u.internal_permissions).to_vec();
+        self.internal_permissions =
+            internal_permissions::Permissions::from(u.internal_permissions).to_vec();
     }
 
     pub(crate) fn parse(&self) -> String {

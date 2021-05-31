@@ -20,8 +20,8 @@ use rocket_contrib::json::Json;
 /// Token added what can be used for introspection.
 #[post("/login", format = "application/json", data = "<login>")]
 fn login(conn: utils::connection::DbConn, login: Json<core::request::Login>) -> String {
-// #[post("/login")]
-// fn login() -> &'static str {
+    // #[post("/login")]
+    // fn login() -> &'static str {
     core::endpoints::login(&*conn.0, login.0)
     // "Hello"
 }
