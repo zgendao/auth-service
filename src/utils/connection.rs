@@ -1,5 +1,3 @@
-use std::env;
-
 use diesel::pg::PgConnection;
 use r2d2;
 use r2d2_diesel::ConnectionManager;

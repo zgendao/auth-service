@@ -4,9 +4,13 @@ use std::env;
 use crate::core::internal_permissions;
 use crate::core::request;
 use crate::core::response;
+use crate::models::groups;
+use crate::models::permissions;
 use crate::models::tokens;
+use crate::models::user_groups;
 use crate::models::users;
 use crate::models::uuid::Uuid;
+use std::alloc::System;
 use std::time::SystemTime;
 
 pub(crate) fn login(conn: &PgConnection, login: request::Login) -> String {
@@ -125,6 +129,108 @@ fn register_base(
     Ok(response_u)
 }
 
+pub(crate) fn create_group(conn: &PgConnection, group: request::Group, token: String) -> String {
+    match create_group_base(conn, group, token) {
+        Ok(g) => serde_json::to_string(&g).unwrap(),
+        Err(e) => e.parse(),
+    }
+}
+
+fn create_group_base(
+    conn: &PgConnection,
+    group: request::Group,
+    token: String,
+) -> Result<groups::Group, response::Error> {
+    let user = introspection_base(conn, token)?;
+    if user
+        .internal_permissions
+        .contains(&internal_permissions::MANAGE_GROUPS.to_string())
+    {
+        let g = groups::GroupForm {
+            name: group.name,
+            description: Some(group.description),
+            created_at: SystemTime::now(),
+            deleted_at: None,
+        }
+        .insert(conn);
+        return Ok(g);
+    }
+    Err(response::Error::new(
+        "forbidden (MANAGE_GROUPS)".to_string(),
+    ))
+}
+
+pub(crate) fn create_permission(
+    conn: &PgConnection,
+    permission: request::Permission,
+    token: String,
+) -> String {
+    match create_permission_base(conn, permission, token) {
+        Ok(p) => serde_json::to_string(&p).unwrap(),
+        Err(e) => e.parse(),
+    }
+}
+
+fn create_permission_base(
+    conn: &PgConnection,
+    permission: request::Permission,
+    token: String,
+) -> Result<permissions::Permission, response::Error> {
+    let user = introspection_base(conn, token)?;
+    if user
+        .internal_permissions
+        .contains(&internal_permissions::MANAGE_PERMISSIONS.to_string())
+    {
+        let p = permissions::PermissionForm {
+            name: permission.name,
+            created_at: SystemTime::now(),
+            deleted_at: None,
+        }
+        .insert(conn);
+        return Ok(p);
+    }
+    Err(response::Error::new(
+        "forbidden (MANAGE_PERMISSIONS)".to_string(),
+    ))
+}
+
+pub(crate) fn add_user_group(
+    conn: &PgConnection,
+    user_group: request::UserGroup,
+    token: String,
+) -> String {
+    match add_user_group_base(conn, user_group, token) {
+        Ok(ug) => serde_json::to_string(&ug).unwrap(),
+        Err(e) => e.parse(),
+    }
+}
+
+fn add_user_group_base(
+    conn: &PgConnection,
+    user_group: request::UserGroup,
+    token: String,
+) -> Result<user_groups::UserGroup, response::Error> {
+    let user = introspection_base(conn, token)?;
+    if user
+        .internal_permissions
+        .contains(&internal_permissions::MANAGE_USERS.to_string())
+    {
+        let u = users::User::get_by_eth_address(user_group.eth_address, conn).unwrap();
+        let g = groups::Group::get_by_name(user_group.group_name, conn).unwrap();
+        let p = permissions::Permission::get_by_name(user_group.permission_name, conn).unwrap();
+        let ug = user_groups::UserGroupForm {
+            user_id: u.id,
+            group_id: g.id,
+            permission_id: p.id,
+            created_at: SystemTime::now(),
+            deleted_at: None,
+        }
+        .insert(conn);
+        return Ok(ug);
+    }
+    Err(response::Error::new("forbidden (MANAGE_USERS)".to_string()))
+}
+
 #[cfg(test)]
 mod tests {
     use diesel::{pg::PgConnection, prelude::*};
@@ -151,7 +257,7 @@ mod tests {
         )
         .unwrap();
 
-        let rt = endpoints::register_token_base(&conn, u.token.token).unwrap();
+        let rt = endpoints::register_token_base(&conn, u.token.clone().token).unwrap();
 
         let r = endpoints::register_base(
             &conn,
@@ -163,9 +269,72 @@ mod tests {
         )
         .unwrap();
 
-        // CREATE group
-        // CREATE 3 persmissions
-        // add user to group with permissions
+        let g = endpoints::create_group_base(
+            &conn,
+            request::Group {
+                name: "test_amazing_group".to_string(),
+                description: "This is an amazing group".to_string(),
+            },
+            u.token.clone().token,
+        )
+        .unwrap();
+
+        let p1 = endpoints::create_permission_base(
+            &conn,
+            request::Permission {
+                name: "service_WRITE".to_string(),
+            },
+            u.token.clone().token,
+        )
+        .unwrap();
+        let p2 = endpoints::create_permission_base(
+            &conn,
+            request::Permission {
+                name: "service_READ".to_string(),
+            },
+            u.token.clone().token,
+        )
+        .unwrap();
+        let p3 = endpoints::create_permission_base(
+            &conn,
+            request::Permission {
+                name: "service_DELETE".to_string(),
+            },
+            u.token.clone().token,
+        )
+        .unwrap();
+
+        endpoints::add_user_group_base(
+            &conn,
+            request::UserGroup {
+                eth_address: r.eth_address.clone(),
+                group_name: g.clone().name,
+                permission_name: p1.name,
+            },
+            u.token.clone().token,
+        )
+        .unwrap();
+        endpoints::add_user_group_base(
+            &conn,
+            request::UserGroup {
+                eth_address: r.eth_address.clone(),
+                group_name: g.clone().name,
+                permission_name: p2.name,
+            },
+            u.token.clone().token,
+        )
+        .unwrap();
+        endpoints::add_user_group_base(
+            &conn,
+            request::UserGroup {
+                eth_address: r.eth_address.clone(),
+                group_name: g.clone().name,
+                permission_name: p3.name,
+            },
+            u.token.clone().token,
+        )
+        .unwrap();
+
         // add internal permissions to user
     }
 

@@ -83,7 +83,7 @@ pub(crate) struct Permission {
     pub(crate) name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub(crate) struct Token {
     pub(crate) token: String,
     pub(crate) expires_at: String,
