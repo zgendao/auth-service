@@ -231,6 +231,17 @@ fn add_user_group_base(
     Err(response::Error::new("forbidden (MANAGE_USERS)".to_string()))
 }
 
+pub(crate) fn add_user_internal_permission(
+    conn: &PgConnection,
+    uip: request::UserInternalPermission,
+    token: String,
+) -> String {
+    match add_user_internal_permission_base(conn, uip, token) {
+        Ok(u) => serde_json::to_string(&u).unwrap(),
+        Err(e) => e.parse(),
+    }
+}
+
 fn add_user_internal_permission_base(
     conn: &PgConnection,
     uip: request::UserInternalPermission,
@@ -250,7 +261,7 @@ fn add_user_internal_permission_base(
 
         let mut response_u = response::User::new();
         response_u.build(conn, new_u.id);
-        Ok(response_u)
+        return Ok(response_u);
     }
     Err(response::Error::new(
         "forbidden (SET_INTERNAL_PERMISSIONS)".to_string(),
