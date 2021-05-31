@@ -48,7 +48,7 @@ pub struct UserForm {
 impl UserForm {
     pub fn insert(&self, conn: &PgConnection) -> User {
         let u = UserForm {
-            internal_permissions: 0,
+            internal_permissions: self.internal_permissions,
             eth_address: self.clone().eth_address,
             signature: self.clone().signature,
             created_at: SystemTime::now(),

@@ -71,7 +71,7 @@ fn register_token_base(
             Uuid::from(user.user_id),
         ));
     }
-    Err(response::Error::new("forbidden (MANAGE_USER)".to_string()))
+    Err(response::Error::new("forbidden (MANAGE_USERS)".to_string()))
 }
 
 pub(crate) fn register(conn: &PgConnection, register: request::Register) -> String {

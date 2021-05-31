@@ -30,7 +30,7 @@ pub(crate) fn group(conn: &PgConnection) -> groups::Group {
 
 pub(crate) fn user(conn: &PgConnection) -> users::User {
     users::UserForm {
-        internal_permissions: 127,
+        internal_permissions: crate::core::internal_permissions::Permissions::max(),
         eth_address: Some(fakeit::password::generate(true, true, false, 32)),
         signature: Some(fakeit::password::generate(true, true, false, 127)),
         created_at: SystemTime::now(),

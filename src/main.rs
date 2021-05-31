@@ -35,7 +35,7 @@ fn introspection() -> &'static str {
 
 /// Create registration token endpoint
 ///
-/// Creates a registration token for adding new users. Requires `manage_user` permission.
+/// Creates a registration token for adding new users. Requires `manage_users` permission.
 #[post("/register_token")]
 fn register_token() -> &'static str {
     "Hello"
@@ -44,7 +44,7 @@ fn register_token() -> &'static str {
 /// Register endpoint
 ///
 /// Creates a new user in the system, it's done by the register token sent with the register
-/// request. Register token can be created by a user who has `manage_user` internal permission.
+/// request. Register token can be created by a user who has `manage_users` internal permission.
 #[get("/register")]
 fn register() -> &'static str {
     "Hello"
