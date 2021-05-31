@@ -252,7 +252,9 @@ fn add_user_internal_permission_base(
         response_u.build(conn, new_u.id);
         Ok(response_u)
     }
-    Err(response::Error::new("forbidden (SET_INTERNAL_PERMISSIONS)".to_string()))
+    Err(response::Error::new(
+        "forbidden (SET_INTERNAL_PERMISSIONS)".to_string(),
+    ))
 }
 
 #[cfg(test)]
@@ -359,7 +361,14 @@ mod tests {
         )
         .unwrap();
 
-        // add internal permissions to user
+        endpoints::add_user_internal_permission_base(
+            &conn,
+            request::UserInternalPermission {
+                eth_address: r.eth_address.clone(),
+                internal_permission: "manage_groups".to_string(),
+            },
+            u.token.clone().token,
+        );
     }
 
     #[test]
