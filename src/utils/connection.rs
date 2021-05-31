@@ -15,7 +15,8 @@ pub fn init_pool() -> Pool {
 }
 
 fn database_url() -> String {
-    env::var("DATABASE_URL").unwrap()
+    // env::var("DATABASE_URL").unwrap()
+    "postgresql://root@127.0.0.1:26257/auth_service?sslmode=disable".to_string()
 }
 
 pub struct DbConn(pub r2d2::PooledConnection<ConnectionManager<PgConnection>>);

@@ -10,18 +10,20 @@ mod core;
 mod models;
 mod utils;
 
+use rocket_contrib::json::Json;
+
 /// Login endpoint
 ///
 /// Accept a login request with eth_address and signed message and returns
 /// the user entity with groups and permissions on that group, also add the
 /// internal permissions as well.
 /// Token added what can be used for introspection.
-// #[post("/login", format = "application/json", data = "<login>")]
-//fn login(conn: utils::connection::DbConn, login: core::request::Login) -> &'static str {
-#[post("/login")]
-fn login() -> &'static str {
-    //core::endpoints::login(conn.0, login)
-    "Hello"
+#[post("/login", format = "application/json", data = "<login>")]
+fn login(conn: utils::connection::DbConn, login: Json<core::request::Login>) -> String {
+// #[post("/login")]
+// fn login() -> &'static str {
+    core::endpoints::login(&*conn.0, login.0)
+    // "Hello"
 }
 
 /// Introspection endpoint
