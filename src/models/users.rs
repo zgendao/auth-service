@@ -33,6 +33,15 @@ impl User {
             .first::<User>(conn)
             .map_or_else(|_| Err("User doesn't exist".to_string()), |user| Ok(user))
     }
+
+    pub fn update(self, conn: &PgConnection) -> Result<User, String> {
+        use crate::models::schema::users::dsl::*;
+        diesel::update(users.filter(id.eq(self.clone().id)))
+            .set((internal_permissions.eq(self.clone().internal_permissions), signature.eq(self.clone().signature)))
+            .get_result::<User>(conn)
+            .expect("error inserting user");
+        Ok(self)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]

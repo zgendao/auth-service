@@ -231,6 +231,30 @@ fn add_user_group_base(
     Err(response::Error::new("forbidden (MANAGE_USERS)".to_string()))
 }
 
+fn add_user_internal_permission_base(
+    conn: &PgConnection,
+    uip: request::UserInternalPermission,
+    token: String,
+) -> Result<response::User, response::Error> {
+    let user = introspection_base(conn, token)?;
+    if user
+        .internal_permissions
+        .contains(&internal_permissions::SET_INTERNAL_PERMISSIONS.to_string())
+    {
+        let mut u = users::User::get_by_eth_address(uip.eth_address, conn).unwrap();
+        let mut ip_vec = internal_permissions::Permissions::from(u.internal_permissions).to_vec();
+        // TODO validate internal_permission
+        ip_vec.push(uip.internal_permission);
+        u.internal_permissions = internal_permissions::Permissions::from_vec(ip_vec).to_number();
+        let new_u = u.update(conn).unwrap();
+
+        let mut response_u = response::User::new();
+        response_u.build(conn, new_u.id);
+        Ok(response_u)
+    }
+    Err(response::Error::new("forbidden (SET_INTERNAL_PERMISSIONS)".to_string()))
+}
+
 #[cfg(test)]
 mod tests {
     use diesel::{pg::PgConnection, prelude::*};

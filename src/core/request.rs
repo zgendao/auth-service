@@ -30,3 +30,9 @@ pub(crate) struct UserGroup {
     pub(crate) group_name: String,
     pub(crate) permission_name: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub(crate) struct UserInternalPermission {
+    pub(crate) eth_address: String,
+    pub(crate) internal_permission: String,
+}
