@@ -34,15 +34,17 @@ impl User {
         &self.token.token
     }
 
-    pub fn build(&mut self, conn: &PgConnection, user_id: uuid::Uuid) {
+    pub fn build(&mut self, conn: &PgConnection, user_id: uuid::Uuid) -> Result<(), Error> {
         let ug = user_groups::UserGroup::get_by_user_id(user_id, &conn).unwrap();
         let u = users::User::get_by_id(user_id, conn).unwrap();
         self.build_groups(conn, ug);
-        self.token = Token::new_auth(conn, user_id);
+        self.token = Token::new_auth(conn, user_id)?;
         self.eth_address = u.eth_address.unwrap();
         self.user_id = u.id.to_string();
         self.internal_permissions =
             internal_permissions::Permissions::from(u.internal_permissions).to_vec();
+
+        Ok(())
     }
 
     pub fn parse(&self) -> String {
@@ -94,39 +96,42 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn new_auth(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
-        let token = Token::save_token(conn, user_id, tokens::AUTH_TYPE.to_string());
+    pub fn new_auth(conn: &PgConnection, user_id: uuid::Uuid) -> Result<Token, Error> {
+        let token = Token::save_token(conn, user_id, tokens::AUTH_TYPE.to_string())?;
         let dt = DateTime::<Utc>::from(token.expires_at);
 
-        Token {
+        Ok(Token {
             token: token.token.to_string(),
             expires_at: dt.to_rfc3339(),
-        }
+        })
     }
 
-    pub fn new_register(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
-        let token = Token::save_token(conn, user_id, tokens::REGISTER_TYPE.to_string());
+    pub fn new_register(conn: &PgConnection, user_id: uuid::Uuid) -> Result<Token, Error> {
+        let token = Token::save_token(conn, user_id, tokens::REGISTER_TYPE.to_string())?;
         let dt = DateTime::<Utc>::from(token.expires_at);
 
-        Token {
+        Ok(Token {
             token: token.token.to_string(),
             expires_at: dt.to_rfc3339(),
-        }
+        })
     }
 
     pub fn parse(&self) -> String {
         serde_json::to_string(self).unwrap()
     }
 
-    fn save_token(conn: &PgConnection, user_id: uuid::Uuid, t: String) -> tokens::Token {
-        let token = tokens::TokenForm {
+    fn save_token(
+        conn: &PgConnection,
+        user_id: uuid::Uuid,
+        t: String,
+    ) -> Result<tokens::Token, Error> {
+        tokens::TokenForm {
             token_type: t,
             user_id,
             created_at: SystemTime::now(),
             expires_at: SystemTime::now(),
         }
-        .insert(conn);
-        token
+        .insert(conn)
     }
 }
 

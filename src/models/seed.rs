@@ -65,7 +65,7 @@ pub fn user_journey(conn: &PgConnection) -> Result<users::User, response::Error>
     Ok(u)
 }
 
-pub fn auth_token(conn: &PgConnection, u: users::User) -> tokens::Token {
+pub fn auth_token(conn: &PgConnection, u: users::User) -> Result<tokens::Token, response::Error> {
     tokens::TokenForm {
         token_type: tokens::AUTH_TYPE.to_string(),
         user_id: u.id,

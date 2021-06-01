@@ -3,6 +3,7 @@ use diesel::{pg::PgConnection, prelude::*, Queryable};
 use serde::{Deserialize, Serialize};
 use std::time::{Duration, SystemTime};
 
+use crate::core::response::Error;
 use crate::models::schema::tokens;
 use crate::models::uuid::Uuid;
 
@@ -47,7 +48,7 @@ pub struct TokenForm {
 }
 
 impl TokenForm {
-    pub fn insert(self, conn: &PgConnection) -> Token {
+    pub fn insert(self, conn: &PgConnection) -> Result<Token, Error> {
         let t = TokenForm {
             token_type: self.token_type,
             user_id: self.user_id,
@@ -56,10 +57,11 @@ impl TokenForm {
                 .checked_add(Duration::new(10800, 0))
                 .unwrap(),
         };
-        diesel::insert_into(tokens::table)
+        let result = diesel::insert_into(tokens::table)
             .values(t)
-            .get_result(conn)
-            .expect("error inserting tokan")
+            .get_result(conn);
+
+        result.map_err(|e| Error::new(format!("token form error: {}", e)))
     }
 }
 

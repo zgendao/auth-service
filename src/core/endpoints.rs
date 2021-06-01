@@ -26,7 +26,7 @@ fn login_base(
     match users::User::get_by_eth_address(&login.eth_address, conn) {
         Ok(u) => {
             let mut user = response::User::new();
-            user.build(conn, u.id);
+            user.build(conn, u.id)?;
             Ok(user)
         }
         Err(err) => Err(response::Error::new(err)),
@@ -46,7 +46,7 @@ fn introspection_base(conn: &PgConnection, token: &str) -> Result<response::User
         Err(e) => return Err(response::Error::new(e)),
     };
     let mut user = response::User::new();
-    user.build(conn, t.user_id);
+    user.build(conn, t.user_id)?;
     Ok(user)
 }
 
@@ -66,12 +66,10 @@ fn register_token_base(
         .internal_permissions
         .contains(&internal_permissions::MANAGE_USERS.to_string())
     {
-        return Ok(response::Token::new_register(
-            conn,
-            Uuid::from(user.user_id),
-        ));
+        response::Token::new_register(conn, Uuid::from(user.user_id))
+    } else {
+        Err(response::Error::new("forbidden (MANAGE_USERS)".to_string()))
     }
-    Err(response::Error::new("forbidden (MANAGE_USERS)".to_string()))
 }
 
 pub fn register(conn: &PgConnection, register: request::Register) -> String {
@@ -121,7 +119,7 @@ fn register_base(
 
     let saved_u = u.insert(conn)?;
     let mut response_u = response::User::new();
-    response_u.build(conn, saved_u.id);
+    response_u.build(conn, saved_u.id)?;
     Ok(response_u)
 }
 
@@ -252,7 +250,7 @@ fn add_user_internal_permission_base(
         u.update(conn).unwrap();
 
         let mut response_u = response::User::new();
-        response_u.build(conn, u.id);
+        response_u.build(conn, u.id)?;
         return Ok(response_u);
     }
     Err(response::Error::new(
@@ -380,7 +378,7 @@ mod tests {
         let conn = PgConnection::establish(&TEST_DATABASE_URL)
             .expect(&format!("Error connecting to {}", TEST_DATABASE_URL));
         let seed_user = seed::user_journey(&conn).unwrap();
-        let seed_token = seed::auth_token(&conn, seed_user);
+        let seed_token = seed::auth_token(&conn, seed_user).unwrap();
 
         let user = endpoints::introspection(&conn, &seed_token.token.to_string());
         println!("{}", user);
@@ -391,7 +389,7 @@ mod tests {
         let conn = PgConnection::establish(&TEST_DATABASE_URL)
             .expect(&format!("Error connecting to {}", TEST_DATABASE_URL));
         let seed_user = seed::user_journey(&conn).unwrap();
-        let seed_token = seed::auth_token(&conn, seed_user);
+        let seed_token = seed::auth_token(&conn, seed_user).unwrap();
 
         let token = endpoints::register_token(&conn, &seed_token.token.to_string());
         println!("{}", token);
