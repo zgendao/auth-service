@@ -21,11 +21,11 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn get_by_token(p_token: Uuid, conn: &PgConnection) -> Result<Token, String> {
+    pub fn get_by_token(p_token: Uuid, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::tokens::dsl::*;
         tokens
             .filter(token.eq(p_token))
-            .first::<Token>(conn)
+            .first::<Self>(conn)
             .map_or_else(|_| Err("Token doesn't exist".to_string()), |t| Ok(t))
     }
 

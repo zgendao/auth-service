@@ -18,19 +18,19 @@ pub struct Group {
 }
 
 impl Group {
-    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<Group, String> {
+    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::groups::dsl::*;
-        groups.filter(id.eq(p_id)).first::<Group>(conn).map_or_else(
+        groups.filter(id.eq(p_id)).first::<Self>(conn).map_or_else(
             |_| Err("Group doesn't exist".to_string()),
             |group| Ok(group),
         )
     }
 
-    pub fn get_by_name(p_name: &str, conn: &PgConnection) -> Result<Group, String> {
+    pub fn get_by_name(p_name: &str, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::groups::dsl::*;
         groups
             .filter(name.eq(p_name))
-            .first::<Group>(conn)
+            .first::<Self>(conn)
             .map_or_else(
                 |_| Err("Group doesn't exist".to_string()),
                 |group| Ok(group),

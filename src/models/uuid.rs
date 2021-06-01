@@ -29,7 +29,7 @@ impl ToSql<UuidDiesel, Pg> for Uuid {
 impl FromSql<UuidDiesel, Pg> for Uuid {
     fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
         let bytes = not_none!(bytes);
-        Ok(Uuid(uuid::Uuid::from_slice(bytes)?))
+        Ok(Self(uuid::Uuid::from_slice(bytes)?))
     }
 }
 
@@ -44,6 +44,6 @@ where
     T: AsRef<str> + Sized,
 {
     fn from(uuid: T) -> Self {
-        Uuid(uuid::Uuid::from_str(uuid.as_ref()).unwrap())
+        Self(uuid::Uuid::from_str(uuid.as_ref()).unwrap())
     }
 }
