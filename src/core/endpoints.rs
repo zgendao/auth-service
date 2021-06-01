@@ -10,7 +10,6 @@ use crate::models::tokens;
 use crate::models::user_groups;
 use crate::models::users;
 use crate::models::uuid::Uuid;
-use std::alloc::System;
 use std::time::SystemTime;
 
 pub(crate) fn login(conn: &PgConnection, login: request::Login) -> String {
@@ -379,7 +378,7 @@ mod tests {
                 internal_permission: "manage_groups".to_string(),
             },
             u.token.clone().token,
-        );
+        ).unwrap();
     }
 
     #[test]

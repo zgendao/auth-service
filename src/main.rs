@@ -52,21 +52,36 @@ fn register(conn: utils::connection::DbConn, register: Json<core::request::Regis
     core::endpoints::register(&*conn.0, register.0)
 }
 
+/// Create permission endpoint
+///
+/// Creates a new permission, requires `manage_permissions` internal permission.
 #[post("/permissions", format = "application/json", data = "<permission>")]
 fn create_permission(conn: utils::connection::DbConn, permission: Json<core::request::Permission>, auth: Authorization) -> String {
     core::endpoints::create_permission(&*conn.0, permission.0, auth.0)
 }
 
+/// Create group endpoint
+///
+/// Creates a new group, requires `manage_groups` internal permission.
+/// TODO Should have owner and the owner must be the creator
 #[post("/groups", format = "application/json", data = "<group>")]
 fn create_group(conn: utils::connection::DbConn, group: Json<core::request::Group>, auth: Authorization) -> String {
     core::endpoints::create_group(&*conn.0, group.0, auth.0)
 }
 
+/// Add user_group endpoint
+///
+/// user_group is an entity where we add a certain permission to a user in a certain group. Requires
+/// `manage_users` internal permission.
 #[put("/users/permissions", format = "application/json", data = "<ug>")]
 fn add_user_group(conn: utils::connection::DbConn, ug: Json<core::request::UserGroup>, auth: Authorization) -> String {
     core::endpoints::add_user_group(&*conn.0, ug.0, auth.0)
 }
 
+/// Add internal permission endpoint
+///
+/// Add one of the internal permissions to a certain user. Requires `set_internal_permissions`
+/// internal permission.
 #[put("/users/internal-permissions", format = "application/json", data = "<ug>")]
 fn add_user_internal_permission(conn: utils::connection::DbConn, ug: Json<core::request::UserInternalPermission>, auth: Authorization) -> String {
     core::endpoints::add_user_internal_permission(&*conn.0, ug.0, auth.0)
@@ -98,16 +113,6 @@ fn get_user_permissions() -> &'static str {
     "Hello, world!" // TODO
 }
 
-/// Add permission to user in group endpoint
-///
-/// Adds a certain permission to the user in a certain group. Requires `manage_permissions` internal
-/// permission.
-#[post("/users/permissions")]
-fn add_user_permissions() -> &'static str {
-    // Someone who has admin permission
-    "Hello, world!" // TODO
-}
-
 fn main() {
     let p = utils::connection::init_pool();
     rocket::ignite()
@@ -119,6 +124,10 @@ fn main() {
                 introspection,
                 register_token,
                 register,
+                create_permission,
+                create_group,
+                add_user_group,
+                add_user_internal_permission,
             ],
         )
         .launch();

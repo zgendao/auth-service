@@ -7,4 +7,5 @@ pub(crate) mod users;
 pub(crate) mod schema;
 pub(crate) mod uuid;
 
+#[cfg(test)]
 pub(crate) mod seed;
