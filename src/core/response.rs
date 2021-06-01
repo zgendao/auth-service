@@ -11,16 +11,16 @@ use crate::models::users;
 use crate::models::uuid;
 
 #[derive(Serialize, Deserialize, Debug, Default)]
-pub(crate) struct User {
-    pub(crate) user_id: String,
-    pub(crate) groups: HashMap<String, Group>,
-    pub(crate) internal_permissions: Vec<String>,
-    pub(crate) eth_address: String,
-    pub(crate) token: Token,
+pub struct User {
+    pub user_id: String,
+    pub groups: HashMap<String, Group>,
+    pub internal_permissions: Vec<String>,
+    pub eth_address: String,
+    pub token: Token,
 }
 
 impl User {
-    pub(crate) fn new() -> User {
+    pub fn new() -> User {
         User {
             user_id: "".to_string(),
             groups: HashMap::<String, Group>::new(),
@@ -30,18 +30,22 @@ impl User {
         }
     }
 
-    pub(crate) fn build(&mut self, conn: &PgConnection, user_id: uuid::Uuid) {
+    pub fn token(&self) -> &str {
+        &self.token.token
+    }
+
+    pub fn build(&mut self, conn: &PgConnection, user_id: uuid::Uuid) {
         let ug = user_groups::UserGroup::get_by_user_id(user_id, &conn).unwrap();
         let u = users::User::get_by_id(user_id, conn).unwrap();
         self.build_groups(conn, ug);
         self.token = Token::new_auth(conn, user_id);
         self.eth_address = u.eth_address.unwrap();
-        self.user_id = u.id.0.to_string();
+        self.user_id = u.id.to_string();
         self.internal_permissions =
             internal_permissions::Permissions::from(u.internal_permissions).to_vec();
     }
 
-    pub(crate) fn parse(&self) -> String {
+    pub fn parse(&self) -> String {
         serde_json::to_string(self).unwrap()
     }
 
@@ -52,16 +56,16 @@ impl User {
         for ug_elem in ug.iter() {
             let g = groups::Group::get_by_id(ug_elem.group_id, conn).unwrap();
             let p = permissions::Permission::get_by_id(ug_elem.permission_id, conn).unwrap();
-            if self.groups.contains_key(&*g.id.0.to_string()) {
-                let g_mut = self.groups.get_mut(&*g.id.0.to_string()).unwrap();
+            if self.groups.contains_key(&*g.id.to_string()) {
+                let g_mut = self.groups.get_mut(&*g.id.to_string()).unwrap();
                 g_mut
                     .permissions
-                    .insert(p.id.0.to_string(), Permission { name: p.name });
+                    .insert(p.id.to_string(), Permission { name: p.name });
             } else {
                 let mut permissions = HashMap::<String, Permission>::new();
-                permissions.insert(p.id.0.to_string(), Permission { name: p.name });
+                permissions.insert(p.id.to_string(), Permission { name: p.name });
                 self.groups.insert(
-                    g.id.0.to_string(),
+                    g.id.to_string(),
                     Group {
                         name: g.name,
                         permissions,
@@ -73,44 +77,44 @@ impl User {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct Group {
-    pub(crate) name: String,
-    pub(crate) permissions: HashMap<String, Permission>,
+pub struct Group {
+    pub name: String,
+    pub permissions: HashMap<String, Permission>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct Permission {
-    pub(crate) name: String,
+pub struct Permission {
+    pub name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
-pub(crate) struct Token {
-    pub(crate) token: String,
-    pub(crate) expires_at: String,
+pub struct Token {
+    pub token: String,
+    pub expires_at: String,
 }
 
 impl Token {
-    pub(crate) fn new_auth(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
+    pub fn new_auth(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
         let token = Token::save_token(conn, user_id, tokens::AUTH_TYPE.to_string());
         let dt = DateTime::<Utc>::from(token.expires_at);
 
         Token {
-            token: token.token.0.to_string(),
+            token: token.token.to_string(),
             expires_at: dt.to_rfc3339(),
         }
     }
 
-    pub(crate) fn new_register(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
+    pub fn new_register(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
         let token = Token::save_token(conn, user_id, tokens::REGISTER_TYPE.to_string());
         let dt = DateTime::<Utc>::from(token.expires_at);
 
         Token {
-            token: token.token.0.to_string(),
+            token: token.token.to_string(),
             expires_at: dt.to_rfc3339(),
         }
     }
 
-    pub(crate) fn parse(&self) -> String {
+    pub fn parse(&self) -> String {
         serde_json::to_string(self).unwrap()
     }
 
@@ -127,20 +131,20 @@ impl Token {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct Error {
-    pub(crate) msg: String,
-    pub(crate) reason_code: String,
+pub struct Error {
+    pub msg: String,
+    pub reason_code: String,
 }
 
 impl Error {
-    pub(crate) fn new(err: String) -> Error {
+    pub fn new(err: String) -> Error {
         Error {
             msg: err,
             reason_code: "INTERNAL_ERROR".to_string(),
         }
     }
 
-    pub(crate) fn parse(&self) -> String {
+    pub fn parse(&self) -> String {
         serde_json::to_string(self).unwrap()
     }
 }

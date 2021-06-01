@@ -3,6 +3,7 @@ use diesel::{pg::PgConnection, prelude::*, Queryable};
 use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 
+use crate::core::response::Error;
 use crate::models::schema::permissions;
 use crate::models::uuid::Uuid;
 
@@ -39,7 +40,7 @@ impl Permission {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]
+#[derive(Debug, PartialEq, Deserialize, Insertable)]
 #[table_name = "permissions"]
 pub struct PermissionForm {
     pub name: String,
@@ -48,16 +49,17 @@ pub struct PermissionForm {
 }
 
 impl PermissionForm {
-    pub fn insert(&self, conn: &PgConnection) -> Permission {
+    pub fn insert(self, conn: &PgConnection) -> Result<Permission, Error> {
         let p = PermissionForm {
-            name: self.clone().name,
+            name: self.name,
             created_at: SystemTime::now(),
             deleted_at: None,
         };
-        diesel::insert_into(permissions::table)
+        let result = diesel::insert_into(permissions::table)
             .values(p)
-            .get_result(conn)
-            .expect("error inserting permission")
+            .get_result(conn);
+
+        result.map_err(|e| Error::new(format!("permission form error: {}", e)))
     }
 }
 

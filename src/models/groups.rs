@@ -3,10 +3,11 @@ use diesel::{pg::PgConnection, prelude::*, Queryable};
 use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 
+use crate::core::response::Error;
 use crate::models::schema::groups;
 use crate::models::uuid::Uuid;
 
-#[derive(Queryable, AsChangeset, Serialize, Debug, Clone)]
+#[derive(Queryable, AsChangeset, Serialize, Debug)]
 #[table_name = "groups"]
 pub struct Group {
     pub id: Uuid,
@@ -25,7 +26,7 @@ impl Group {
         )
     }
 
-    pub fn get_by_name(p_name: String, conn: &PgConnection) -> Result<Group, String> {
+    pub fn get_by_name(p_name: &str, conn: &PgConnection) -> Result<Group, String> {
         use crate::models::schema::groups::dsl::*;
         groups
             .filter(name.eq(p_name))
@@ -37,7 +38,7 @@ impl Group {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]
+#[derive(Debug, PartialEq, Deserialize, Insertable)]
 #[table_name = "groups"]
 pub struct GroupForm {
     pub name: String,
@@ -47,17 +48,18 @@ pub struct GroupForm {
 }
 
 impl GroupForm {
-    pub fn insert(&self, conn: &PgConnection) -> Group {
+    pub fn insert(self, conn: &PgConnection) -> Result<Group, Error> {
         let g = GroupForm {
-            name: self.clone().name,
-            description: self.clone().description,
+            name: self.name,
+            description: self.description,
             created_at: SystemTime::now(),
             deleted_at: None,
         };
-        diesel::insert_into(groups::table)
+        let result = diesel::insert_into(groups::table)
             .values(g)
-            .get_result(conn)
-            .expect("error inserting group")
+            .get_result(conn);
+
+        result.map_err(|e| Error::new(format!("group form error: {}", e)))
     }
 }
 
@@ -81,11 +83,11 @@ mod tests {
         };
         let conn = PgConnection::establish(&TEST_DATABASE_URL)
             .expect(&format!("Error connecting to {}", TEST_DATABASE_URL));
-        let group = g.insert(&conn);
+        let group = g.insert(&conn).unwrap();
         println!("{:?}", group);
         match Group::get_by_id(group.id.clone(), &conn) {
             Ok(q_group) => {
-                assert_eq!(q_group.id.0.to_string(), group.id.0.to_string());
+                assert_eq!(q_group.id.to_string(), group.id.to_string());
                 assert_eq!(q_group.name, group.name);
             }
             Err(err) => {

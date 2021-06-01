@@ -3,6 +3,7 @@ use diesel::{pg::PgConnection, prelude::*, Queryable};
 use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 
+use crate::core::response::Error;
 use crate::models::schema::user_groups;
 use crate::models::uuid::Uuid;
 
@@ -52,18 +53,18 @@ pub struct UserGroupForm {
 }
 
 impl UserGroupForm {
-    pub fn insert(&self, conn: &PgConnection) -> UserGroup {
+    pub fn insert(self, conn: &PgConnection) -> Result<UserGroup, Error> {
         let ug = UserGroupForm {
-            user_id: self.clone().user_id,
-            group_id: self.clone().group_id,
-            permission_id: self.clone().permission_id,
+            user_id: self.user_id,
+            group_id: self.group_id,
+            permission_id: self.permission_id,
             created_at: SystemTime::now(),
             deleted_at: None,
         };
         diesel::insert_into(user_groups::table)
             .values(ug)
             .get_result(conn)
-            .expect("error inserting user_groups")
+            .map_err(|_| Error::new("error inserting user_groups".to_owned()))
     }
 }
 
@@ -80,23 +81,37 @@ mod tests {
 
     #[test]
     fn test_group_insert() {
-        let user_id = Uuid::from(uuid::Uuid::new_v4());
-        let group_id = Uuid::from(uuid::Uuid::new_v4());
-        let mut ug = UserGroupForm {
+        let user_id = Uuid::new(uuid::Uuid::new_v4());
+        let group_id = Uuid::new(uuid::Uuid::new_v4());
+        let ug = UserGroupForm {
             user_id,
             group_id,
-            permission_id: Uuid::from(uuid::Uuid::new_v4()),
+            permission_id: Uuid::new(uuid::Uuid::new_v4()),
             created_at: SystemTime::now(),
             deleted_at: None,
         };
         let conn = PgConnection::establish(&TEST_DATABASE_URL)
             .expect(&format!("Error connecting to {}", TEST_DATABASE_URL));
 
-        ug.insert(&conn);
-        ug.permission_id = Uuid::from(uuid::Uuid::new_v4());
-        ug.insert(&conn);
-        ug.permission_id = Uuid::from(uuid::Uuid::new_v4());
-        ug.insert(&conn);
+        ug.insert(&conn).unwrap();
+
+        let ug = UserGroupForm {
+            user_id,
+            group_id,
+            permission_id: Uuid::new(uuid::Uuid::new_v4()),
+            created_at: SystemTime::now(),
+            deleted_at: None,
+        };
+        ug.insert(&conn).unwrap();
+
+        let ug = UserGroupForm {
+            user_id,
+            group_id,
+            permission_id: Uuid::new(uuid::Uuid::new_v4()),
+            created_at: SystemTime::now(),
+            deleted_at: None,
+        };
+        ug.insert(&conn).unwrap();
 
         let result = UserGroup::get_by_user_id(user_id, &conn);
         match result {

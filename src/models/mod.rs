@@ -1,11 +1,11 @@
-pub(crate) mod groups;
-pub(crate) mod permissions;
-pub(crate) mod tokens;
-pub(crate) mod user_groups;
-pub(crate) mod users;
+pub mod groups;
+pub mod permissions;
+pub mod tokens;
+pub mod user_groups;
+pub mod users;
 
-pub(crate) mod schema;
-pub(crate) mod uuid;
+pub mod schema;
+pub mod uuid;
 
 #[cfg(test)]
-pub(crate) mod seed;
+pub mod seed;

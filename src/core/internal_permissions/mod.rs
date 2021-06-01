@@ -8,19 +8,19 @@ pub const GET_GROUPS: &str = "get_groups"; // << 7
 pub const GET_PERMISSIONS: &str = "get_permissions"; // << 8
 
 #[derive(Default)]
-pub(crate) struct Permissions {
-    pub(crate) manage_permissions: bool,
-    pub(crate) manage_users: bool,
-    pub(crate) manage_groups: bool,
-    pub(crate) manage_tokens: bool,
-    pub(crate) set_internal_permissions: bool,
-    pub(crate) get_users: bool,
-    pub(crate) get_groups: bool,
-    pub(crate) get_permissions: bool,
+pub struct Permissions {
+    pub manage_permissions: bool,
+    pub manage_users: bool,
+    pub manage_groups: bool,
+    pub manage_tokens: bool,
+    pub set_internal_permissions: bool,
+    pub get_users: bool,
+    pub get_groups: bool,
+    pub get_permissions: bool,
 }
 
 impl Permissions {
-    pub(crate) fn from(f: i64) -> Self {
+    pub fn from(f: i64) -> Self {
         let mut p = Permissions::default();
         if f & (1 << 1) != 0 {
             p.manage_permissions = true;
@@ -49,7 +49,7 @@ impl Permissions {
         p
     }
 
-    pub(crate) fn from_vec(f: Vec<String>) -> Self {
+    pub fn from_vec(f: Vec<String>) -> Self {
         let mut p = Permissions::default();
         if f.contains(&MANAGE_PERMISSIONS.to_string()) {
             p.manage_permissions = true;
@@ -78,7 +78,7 @@ impl Permissions {
         p
     }
 
-    pub(crate) fn to_number(&self) -> i64 {
+    pub fn to_number(&self) -> i64 {
         let mut n = 0;
         if self.manage_permissions {
             n = n + (1 << 1);
@@ -107,7 +107,7 @@ impl Permissions {
         n
     }
 
-    pub(crate) fn to_vec(&self) -> Vec<String> {
+    pub fn to_vec(&self) -> Vec<String> {
         let mut n = Vec::<String>::new();
         if self.manage_permissions {
             n.push(MANAGE_PERMISSIONS.to_string())
@@ -136,7 +136,7 @@ impl Permissions {
         n
     }
 
-    pub(crate) fn max() -> i64 {
+    pub fn max() -> i64 {
         Permissions {
             manage_permissions: true,
             manage_users: true,
