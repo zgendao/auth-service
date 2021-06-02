@@ -16,22 +16,22 @@ pub struct Permission {
 }
 
 impl Permission {
-    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<Permission, String> {
+    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::permissions::dsl::*;
         permissions
             .filter(id.eq(p_id))
-            .first::<Permission>(conn)
+            .first::<Self>(conn)
             .map_or_else(
                 |_| Err("Permission doesn't exist".to_string()),
                 |permission| Ok(permission),
             )
     }
 
-    pub fn get_by_name(p_name: String, conn: &PgConnection) -> Result<Permission, String> {
+    pub fn get_by_name(p_name: String, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::permissions::dsl::*;
         permissions
             .filter(name.eq(p_name))
-            .first::<Permission>(conn)
+            .first::<Self>(conn)
             .map_or_else(
                 |_| Err("Permission doesn't exist".to_string()),
                 |permission| Ok(permission),
@@ -48,14 +48,11 @@ pub struct PermissionForm {
 }
 
 impl PermissionForm {
-    pub fn insert(self, conn: &PgConnection) -> Permission {
-        let p = PermissionForm {
-            name: self.name,
-            created_at: SystemTime::now(),
-            deleted_at: None,
-        };
+    pub fn insert(mut self, conn: &PgConnection) -> Permission {
+        self.created_at = SystemTime::now();
+        self.deleted_at = None;
         diesel::insert_into(permissions::table)
-            .values(p)
+            .values(self)
             .get_result(conn)
             .expect("error inserting permission")
     }

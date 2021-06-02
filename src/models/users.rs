@@ -18,23 +18,23 @@ pub struct User {
 }
 
 impl User {
-    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<User, String> {
+    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::users::dsl::*;
         users
             .filter(id.eq(p_id))
-            .first::<User>(conn)
+            .first::<Self>(conn)
             .map_or_else(|_| Err("User doesn't exist".to_string()), |user| Ok(user))
     }
 
-    pub fn get_by_eth_address(p_eth_address: String, conn: &PgConnection) -> Result<User, String> {
+    pub fn get_by_eth_address(p_eth_address: String, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::users::dsl::*;
         users
             .filter(eth_address.eq(p_eth_address))
-            .first::<User>(conn)
+            .first::<Self>(conn)
             .map_or_else(|_| Err("User doesn't exist".to_string()), |user| Ok(user))
     }
 
-    pub fn update(self, conn: &PgConnection) -> Result<User, String> {
+    pub fn update(self, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::users::dsl::*;
         let signature_opt = self.signature.clone();
         diesel::update(users.filter(id.eq(self.id)))
@@ -42,7 +42,7 @@ impl User {
                 internal_permissions.eq(self.internal_permissions),
                 signature.eq(&signature_opt),
             ))
-            .get_result::<User>(conn)
+            .get_result::<Self>(conn)
             .expect("error inserting user");
         Ok(self)
     }
@@ -59,16 +59,11 @@ pub struct UserForm {
 }
 
 impl UserForm {
-    pub fn insert(self, conn: &PgConnection) -> User {
-        let u = UserForm {
-            internal_permissions: self.internal_permissions,
-            eth_address: self.eth_address,
-            signature: self.signature,
-            created_at: SystemTime::now(),
-            deleted_at: None,
-        };
+    pub fn insert(mut self, conn: &PgConnection) -> User {
+        self.created_at = SystemTime::now();
+        self.deleted_at = None;
         diesel::insert_into(users::table)
-            .values(u)
+            .values(self)
             .get_result(conn)
             .expect("error inserting user")
     }

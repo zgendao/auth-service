@@ -20,11 +20,11 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn get_by_token(p_token: Uuid, conn: &PgConnection) -> Result<Token, String> {
+    pub fn get_by_token(p_token: Uuid, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::tokens::dsl::*;
         tokens
             .filter(token.eq(p_token))
-            .first::<Token>(conn)
+            .first::<Self>(conn)
             .map_or_else(|_| Err("Token doesn't exist".to_string()), |t| Ok(t))
     }
 
@@ -47,17 +47,13 @@ pub struct TokenForm {
 }
 
 impl TokenForm {
-    pub fn insert(self, conn: &PgConnection) -> Token {
-        let t = TokenForm {
-            token_type: self.token_type,
-            user_id: self.user_id,
-            created_at: SystemTime::now(),
-            expires_at: SystemTime::now()
-                .checked_add(Duration::new(10800, 0))
-                .unwrap(),
-        };
+    pub fn insert(mut self, conn: &PgConnection) -> Token {
+        self.created_at = SystemTime::now();
+        self.expires_at = SystemTime::now()
+            .checked_add(Duration::new(10800, 0))
+            .unwrap();
         diesel::insert_into(tokens::table)
-            .values(t)
+            .values(self)
             .get_result(conn)
             .expect("error inserting tokan")
     }

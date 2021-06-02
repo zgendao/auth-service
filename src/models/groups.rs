@@ -17,19 +17,19 @@ pub struct Group {
 }
 
 impl Group {
-    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<Group, String> {
+    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::groups::dsl::*;
-        groups.filter(id.eq(p_id)).first::<Group>(conn).map_or_else(
+        groups.filter(id.eq(p_id)).first::<Self>(conn).map_or_else(
             |_| Err("Group doesn't exist".to_string()),
             |group| Ok(group),
         )
     }
 
-    pub fn get_by_name(p_name: String, conn: &PgConnection) -> Result<Group, String> {
+    pub fn get_by_name(p_name: String, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::groups::dsl::*;
         groups
             .filter(name.eq(p_name))
-            .first::<Group>(conn)
+            .first::<Self>(conn)
             .map_or_else(
                 |_| Err("Group doesn't exist".to_string()),
                 |group| Ok(group),
@@ -47,15 +47,11 @@ pub struct GroupForm {
 }
 
 impl GroupForm {
-    pub fn insert(self, conn: &PgConnection) -> Group {
-        let g = GroupForm {
-            name: self.name,
-            description: self.description,
-            created_at: SystemTime::now(),
-            deleted_at: None,
-        };
+    pub fn insert(mut self, conn: &PgConnection) -> Group {
+        self.created_at = SystemTime::now();
+        self.deleted_at = None;
         diesel::insert_into(groups::table)
-            .values(g)
+            .values(self)
             .get_result(conn)
             .expect("error inserting group")
     }

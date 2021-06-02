@@ -18,22 +18,22 @@ pub struct UserGroup {
 }
 
 impl UserGroup {
-    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<UserGroup, String> {
+    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::user_groups::dsl::*;
         user_groups
             .filter(id.eq(p_id))
-            .first::<UserGroup>(conn)
+            .first::<Self>(conn)
             .map_or_else(
                 |_| Err("UserGroup doesn't exist".to_string()),
                 |user_group| Ok(user_group),
             )
     }
 
-    pub fn get_by_user_id(p_user_id: Uuid, conn: &PgConnection) -> Result<Vec<UserGroup>, String> {
+    pub fn get_by_user_id(p_user_id: Uuid, conn: &PgConnection) -> Result<Vec<Self>, String> {
         use crate::models::schema::user_groups::dsl::*;
         user_groups
             .filter(user_id.eq(p_user_id))
-            .load::<UserGroup>(conn)
+            .load::<Self>(conn)
             .map_or_else(
                 |_| Err("UserGroup doesn't exist".to_string()),
                 |user_group| Ok(user_group),
@@ -52,16 +52,11 @@ pub struct UserGroupForm {
 }
 
 impl UserGroupForm {
-    pub fn insert(self, conn: &PgConnection) -> UserGroup {
-        let ug = UserGroupForm {
-            user_id: self.user_id,
-            group_id: self.group_id,
-            permission_id: self.permission_id,
-            created_at: SystemTime::now(),
-            deleted_at: None,
-        };
+    pub fn insert(mut self, conn: &PgConnection) -> UserGroup {
+        self.created_at = SystemTime::now();
+        self.deleted_at = None;
         diesel::insert_into(user_groups::table)
-            .values(ug)
+            .values(self)
             .get_result(conn)
             .expect("error inserting user_groups")
     }
