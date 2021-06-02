@@ -81,28 +81,28 @@ impl Permissions {
     pub fn to_number(&self) -> i64 {
         let mut n = 0;
         if self.manage_permissions {
-            n = n + (1 << 1);
+            n += 1 << 1;
         }
         if self.manage_users {
-            n = n + (1 << 2);
+            n += 1 << 2;
         }
         if self.manage_groups {
-            n = n + (1 << 3);
+            n += 1 << 3;
         }
         if self.manage_tokens {
-            n = n + (1 << 4);
+            n += 1 << 4;
         }
         if self.set_internal_permissions {
-            n = n + (1 << 5);
+            n += 1 << 5;
         }
         if self.get_users {
-            n = n + (1 << 6);
+            n += 1 << 6;
         }
         if self.get_groups {
-            n = n + (1 << 7);
+            n += 1 << 7;
         }
         if self.get_permissions {
-            n = n + (1 << 8);
+            n += 1 << 8;
         }
         n
     }

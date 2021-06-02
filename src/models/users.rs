@@ -24,7 +24,7 @@ impl User {
         users
             .filter(id.eq(p_id))
             .first::<Self>(conn)
-            .map_or_else(|_| Err("User doesn't exist".to_string()), |user| Ok(user))
+            .map_or_else(|_| Err("User doesn't exist".to_string()), Ok)
     }
 
     pub fn get_by_eth_address(p_eth_address: &str, conn: &PgConnection) -> Result<Self, String> {
@@ -32,7 +32,7 @@ impl User {
         users
             .filter(eth_address.eq(p_eth_address))
             .first::<Self>(conn)
-            .map_or_else(|_| Err("User doesn't exist".to_string()), |user| Ok(user))
+            .map_or_else(|_| Err("User doesn't exist".to_string()), Ok)
     }
 
     pub fn update(&self, conn: &PgConnection) -> Result<(), String> {

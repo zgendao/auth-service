@@ -26,7 +26,7 @@ impl Token {
         tokens
             .filter(token.eq(p_token))
             .first::<Self>(conn)
-            .map_or_else(|_| Err("Token doesn't exist".to_string()), |t| Ok(t))
+            .map_or_else(|_| Err("Token doesn't exist".to_string()), Ok)
     }
 
     pub fn delete(&self, conn: &PgConnection) -> Result<(), String> {

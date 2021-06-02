@@ -19,25 +19,25 @@ pub struct UserGroup {
 }
 
 impl UserGroup {
-    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<UserGroup, String> {
+    pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::user_groups::dsl::*;
         user_groups
             .filter(id.eq(p_id))
-            .first::<UserGroup>(conn)
+            .first::<Self>(conn)
             .map_or_else(
                 |_| Err("UserGroup doesn't exist".to_string()),
-                |user_group| Ok(user_group),
+                Ok,
             )
     }
 
-    pub fn get_by_user_id(p_user_id: Uuid, conn: &PgConnection) -> Result<Vec<UserGroup>, String> {
+    pub fn get_by_user_id(p_user_id: Uuid, conn: &PgConnection) -> Result<Vec<Self>, String> {
         use crate::models::schema::user_groups::dsl::*;
         user_groups
             .filter(user_id.eq(p_user_id))
-            .load::<UserGroup>(conn)
+            .load::<Self>(conn)
             .map_or_else(
                 |_| Err("UserGroup doesn't exist".to_string()),
-                |user_group| Ok(user_group),
+                Ok,
             )
     }
 }

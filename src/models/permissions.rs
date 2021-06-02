@@ -24,7 +24,7 @@ impl Permission {
             .first::<Self>(conn)
             .map_or_else(
                 |_| Err("Permission doesn't exist".to_string()),
-                |permission| Ok(permission),
+                Ok,
             )
     }
 
@@ -35,7 +35,7 @@ impl Permission {
             .first::<Self>(conn)
             .map_or_else(
                 |_| Err("Permission doesn't exist".to_string()),
-                |permission| Ok(permission),
+                Ok,
             )
     }
 }

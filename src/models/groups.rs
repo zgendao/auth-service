@@ -22,7 +22,7 @@ impl Group {
         use crate::models::schema::groups::dsl::*;
         groups.filter(id.eq(p_id)).first::<Self>(conn).map_or_else(
             |_| Err("Group doesn't exist".to_string()),
-            |group| Ok(group),
+            Ok,
         )
     }
 
@@ -33,7 +33,7 @@ impl Group {
             .first::<Self>(conn)
             .map_or_else(
                 |_| Err("Group doesn't exist".to_string()),
-                |group| Ok(group),
+                Ok,
             )
     }
 }
