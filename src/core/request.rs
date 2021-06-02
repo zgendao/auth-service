@@ -1,38 +1,38 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct Login {
-    pub(crate) eth_address: String,
-    pub(crate) signature: String,
+pub struct Login {
+    pub eth_address: String,
+    pub signature: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct Register {
-    pub(crate) eth_address: String,
-    pub(crate) signature: String,
-    pub(crate) register_token: String,
+pub struct Register {
+    pub eth_address: String,
+    pub signature: String,
+    pub register_token: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct Group {
-    pub(crate) name: String,
-    pub(crate) description: String,
+pub struct Group {
+    pub name: String,
+    pub description: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct Permission {
-    pub(crate) name: String,
+pub struct Permission {
+    pub name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct UserGroup {
-    pub(crate) eth_address: String,
-    pub(crate) group_name: String,
-    pub(crate) permission_name: String,
+pub struct UserGroup {
+    pub eth_address: String,
+    pub group_name: String,
+    pub permission_name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct UserInternalPermission {
-    pub(crate) eth_address: String,
-    pub(crate) internal_permission: String,
+pub struct UserInternalPermission {
+    pub eth_address: String,
+    pub internal_permission: String,
 }

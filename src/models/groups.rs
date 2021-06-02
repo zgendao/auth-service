@@ -6,7 +6,7 @@ use std::time::SystemTime;
 use crate::models::schema::groups;
 use crate::models::uuid::Uuid;
 
-#[derive(Queryable, AsChangeset, Serialize, Debug, Clone)]
+#[derive(Queryable, AsChangeset, Serialize, Debug)]
 #[table_name = "groups"]
 pub struct Group {
     pub id: Uuid,
@@ -37,7 +37,7 @@ impl Group {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]
+#[derive(Debug, PartialEq, Deserialize, Insertable)]
 #[table_name = "groups"]
 pub struct GroupForm {
     pub name: String,
@@ -47,10 +47,10 @@ pub struct GroupForm {
 }
 
 impl GroupForm {
-    pub fn insert(&self, conn: &PgConnection) -> Group {
+    pub fn insert(self, conn: &PgConnection) -> Group {
         let g = GroupForm {
-            name: self.clone().name,
-            description: self.clone().description,
+            name: self.name,
+            description: self.description,
             created_at: SystemTime::now(),
             deleted_at: None,
         };

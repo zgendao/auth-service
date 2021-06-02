@@ -6,7 +6,7 @@ use std::time::SystemTime;
 use crate::models::schema::users;
 use crate::models::uuid::Uuid;
 
-#[derive(Queryable, AsChangeset, Serialize, Debug, Clone)]
+#[derive(Queryable, AsChangeset, Serialize, Debug)]
 #[table_name = "users"]
 pub struct User {
     pub id: Uuid,
@@ -36,15 +36,19 @@ impl User {
 
     pub fn update(self, conn: &PgConnection) -> Result<User, String> {
         use crate::models::schema::users::dsl::*;
-        diesel::update(users.filter(id.eq(self.clone().id)))
-            .set((internal_permissions.eq(self.clone().internal_permissions), signature.eq(self.clone().signature)))
+        let signature_opt = self.signature.clone();
+        diesel::update(users.filter(id.eq(self.id)))
+            .set((
+                internal_permissions.eq(self.internal_permissions),
+                signature.eq(&signature_opt),
+            ))
             .get_result::<User>(conn)
             .expect("error inserting user");
         Ok(self)
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]
+#[derive(Debug, PartialEq, Deserialize, Insertable)]
 #[table_name = "users"]
 pub struct UserForm {
     pub internal_permissions: i64,
@@ -55,11 +59,11 @@ pub struct UserForm {
 }
 
 impl UserForm {
-    pub fn insert(&self, conn: &PgConnection) -> User {
+    pub fn insert(self, conn: &PgConnection) -> User {
         let u = UserForm {
             internal_permissions: self.internal_permissions,
-            eth_address: self.clone().eth_address,
-            signature: self.clone().signature,
+            eth_address: self.eth_address,
+            signature: self.signature,
             created_at: SystemTime::now(),
             deleted_at: None,
         };

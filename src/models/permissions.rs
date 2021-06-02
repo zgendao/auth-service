@@ -6,7 +6,7 @@ use std::time::SystemTime;
 use crate::models::schema::permissions;
 use crate::models::uuid::Uuid;
 
-#[derive(Queryable, AsChangeset, Serialize, Debug, Clone)]
+#[derive(Queryable, AsChangeset, Serialize, Debug)]
 #[table_name = "permissions"]
 pub struct Permission {
     pub id: Uuid,
@@ -39,7 +39,7 @@ impl Permission {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]
+#[derive(Debug, PartialEq, Deserialize, Insertable)]
 #[table_name = "permissions"]
 pub struct PermissionForm {
     pub name: String,
@@ -48,9 +48,9 @@ pub struct PermissionForm {
 }
 
 impl PermissionForm {
-    pub fn insert(&self, conn: &PgConnection) -> Permission {
+    pub fn insert(self, conn: &PgConnection) -> Permission {
         let p = PermissionForm {
-            name: self.clone().name,
+            name: self.name,
             created_at: SystemTime::now(),
             deleted_at: None,
         };

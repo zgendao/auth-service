@@ -9,7 +9,7 @@ use crate::models::uuid::Uuid;
 pub const AUTH_TYPE: &str = "auth";
 pub const REGISTER_TYPE: &str = "register";
 
-#[derive(Queryable, AsChangeset, Serialize, Debug, Clone)]
+#[derive(Queryable, AsChangeset, Serialize, Debug)]
 #[table_name = "tokens"]
 pub struct Token {
     pub token: Uuid,
@@ -37,7 +37,7 @@ impl Token {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize, Insertable)]
+#[derive(Debug, PartialEq, Deserialize, Insertable)]
 #[table_name = "tokens"]
 pub struct TokenForm {
     pub token_type: String,
@@ -47,10 +47,10 @@ pub struct TokenForm {
 }
 
 impl TokenForm {
-    pub fn insert(&self, conn: &PgConnection) -> Token {
+    pub fn insert(self, conn: &PgConnection) -> Token {
         let t = TokenForm {
-            token_type: self.clone().token_type,
-            user_id: self.clone().user_id,
+            token_type: self.token_type,
+            user_id: self.user_id,
             created_at: SystemTime::now(),
             expires_at: SystemTime::now()
                 .checked_add(Duration::new(10800, 0))

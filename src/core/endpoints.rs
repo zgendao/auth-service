@@ -12,7 +12,7 @@ use crate::models::users;
 use crate::models::uuid::Uuid;
 use std::time::SystemTime;
 
-pub(crate) fn login(conn: &PgConnection, login: request::Login) -> String {
+pub fn login(conn: &PgConnection, login: request::Login) -> String {
     match login_base(conn, login) {
         Ok(l) => l.parse(),
         Err(e) => e.parse(),
@@ -33,17 +33,14 @@ fn login_base(
     }
 }
 
-pub(crate) fn introspection(conn: &PgConnection, token: String) -> String {
+pub fn introspection(conn: &PgConnection, token: &str) -> String {
     match introspection_base(conn, token) {
         Ok(u) => u.parse(),
         Err(e) => e.parse(),
     }
 }
 
-fn introspection_base(
-    conn: &PgConnection,
-    token: String,
-) -> Result<response::User, response::Error> {
+fn introspection_base(conn: &PgConnection, token: &str) -> Result<response::User, response::Error> {
     let t = match tokens::Token::get_by_token(Uuid::from(token), conn) {
         Ok(t) => t,
         Err(e) => return Err(response::Error::new(e)),
@@ -53,7 +50,7 @@ fn introspection_base(
     Ok(user)
 }
 
-pub(crate) fn register_token(conn: &PgConnection, token: String) -> String {
+pub fn register_token(conn: &PgConnection, token: &str) -> String {
     match register_token_base(conn, token) {
         Ok(t) => t.parse(),
         Err(e) => e.parse(),
@@ -62,7 +59,7 @@ pub(crate) fn register_token(conn: &PgConnection, token: String) -> String {
 
 fn register_token_base(
     conn: &PgConnection,
-    token: String,
+    token: &str,
 ) -> Result<response::Token, response::Error> {
     let user = introspection_base(conn, token)?;
     if user
@@ -77,7 +74,7 @@ fn register_token_base(
     Err(response::Error::new("forbidden (MANAGE_USERS)".to_string()))
 }
 
-pub(crate) fn register(conn: &PgConnection, register: request::Register) -> String {
+pub fn register(conn: &PgConnection, register: request::Register) -> String {
     match register_base(conn, register) {
         Ok(u) => u.parse(),
         Err(e) => e.parse(),
@@ -128,7 +125,7 @@ fn register_base(
     Ok(response_u)
 }
 
-pub(crate) fn create_group(conn: &PgConnection, group: request::Group, token: String) -> String {
+pub fn create_group(conn: &PgConnection, group: request::Group, token: &str) -> String {
     match create_group_base(conn, group, token) {
         Ok(g) => serde_json::to_string(&g).unwrap(),
         Err(e) => e.parse(),
@@ -138,7 +135,7 @@ pub(crate) fn create_group(conn: &PgConnection, group: request::Group, token: St
 fn create_group_base(
     conn: &PgConnection,
     group: request::Group,
-    token: String,
+    token: &str,
 ) -> Result<groups::Group, response::Error> {
     let user = introspection_base(conn, token)?;
     if user
@@ -159,10 +156,10 @@ fn create_group_base(
     ))
 }
 
-pub(crate) fn create_permission(
+pub fn create_permission(
     conn: &PgConnection,
     permission: request::Permission,
-    token: String,
+    token: &str,
 ) -> String {
     match create_permission_base(conn, permission, token) {
         Ok(p) => serde_json::to_string(&p).unwrap(),
@@ -173,7 +170,7 @@ pub(crate) fn create_permission(
 fn create_permission_base(
     conn: &PgConnection,
     permission: request::Permission,
-    token: String,
+    token: &str,
 ) -> Result<permissions::Permission, response::Error> {
     let user = introspection_base(conn, token)?;
     if user
@@ -193,11 +190,7 @@ fn create_permission_base(
     ))
 }
 
-pub(crate) fn add_user_group(
-    conn: &PgConnection,
-    user_group: request::UserGroup,
-    token: String,
-) -> String {
+pub fn add_user_group(conn: &PgConnection, user_group: request::UserGroup, token: &str) -> String {
     match add_user_group_base(conn, user_group, token) {
         Ok(ug) => serde_json::to_string(&ug).unwrap(),
         Err(e) => e.parse(),
@@ -207,7 +200,7 @@ pub(crate) fn add_user_group(
 fn add_user_group_base(
     conn: &PgConnection,
     user_group: request::UserGroup,
-    token: String,
+    token: &str,
 ) -> Result<user_groups::UserGroup, response::Error> {
     let user = introspection_base(conn, token)?;
     if user
@@ -230,10 +223,10 @@ fn add_user_group_base(
     Err(response::Error::new("forbidden (MANAGE_USERS)".to_string()))
 }
 
-pub(crate) fn add_user_internal_permission(
+pub fn add_user_internal_permission(
     conn: &PgConnection,
     uip: request::UserInternalPermission,
-    token: String,
+    token: &str,
 ) -> String {
     match add_user_internal_permission_base(conn, uip, token) {
         Ok(u) => serde_json::to_string(&u).unwrap(),
@@ -244,7 +237,7 @@ pub(crate) fn add_user_internal_permission(
 fn add_user_internal_permission_base(
     conn: &PgConnection,
     uip: request::UserInternalPermission,
-    token: String,
+    token: &str,
 ) -> Result<response::User, response::Error> {
     let user = introspection_base(conn, token)?;
     if user
@@ -293,7 +286,7 @@ mod tests {
         )
         .unwrap();
 
-        let rt = endpoints::register_token_base(&conn, u.token.clone().token).unwrap();
+        let rt = endpoints::register_token_base(&conn, u.token.clone().token.as_str()).unwrap();
 
         let r = endpoints::register_base(
             &conn,
@@ -311,7 +304,7 @@ mod tests {
                 name: "test_amazing_group".to_string(),
                 description: "This is an amazing group".to_string(),
             },
-            u.token.clone().token,
+            u.token.clone().token.as_str(),
         )
         .unwrap();
 
@@ -320,7 +313,7 @@ mod tests {
             request::Permission {
                 name: "service_WRITE".to_string(),
             },
-            u.token.clone().token,
+            u.token.clone().token.as_str(),
         )
         .unwrap();
         let p2 = endpoints::create_permission_base(
@@ -328,7 +321,7 @@ mod tests {
             request::Permission {
                 name: "service_READ".to_string(),
             },
-            u.token.clone().token,
+            u.token.clone().token.as_str(),
         )
         .unwrap();
         let p3 = endpoints::create_permission_base(
@@ -336,38 +329,38 @@ mod tests {
             request::Permission {
                 name: "service_DELETE".to_string(),
             },
-            u.token.clone().token,
+            u.token.clone().token.as_str(),
         )
         .unwrap();
-
+        let name = g.name.as_str();
         endpoints::add_user_group_base(
             &conn,
             request::UserGroup {
                 eth_address: r.eth_address.clone(),
-                group_name: g.clone().name,
+                group_name: name.to_string(),
                 permission_name: p1.name,
             },
-            u.token.clone().token,
+            u.token.clone().token.as_str(),
         )
         .unwrap();
         endpoints::add_user_group_base(
             &conn,
             request::UserGroup {
                 eth_address: r.eth_address.clone(),
-                group_name: g.clone().name,
+                group_name: name.to_string(),
                 permission_name: p2.name,
             },
-            u.token.clone().token,
+            u.token.clone().token.as_str(),
         )
         .unwrap();
         endpoints::add_user_group_base(
             &conn,
             request::UserGroup {
                 eth_address: r.eth_address.clone(),
-                group_name: g.clone().name,
+                group_name: name.to_string(),
                 permission_name: p3.name,
             },
-            u.token.clone().token,
+            u.token.clone().token.as_str(),
         )
         .unwrap();
 
@@ -377,8 +370,9 @@ mod tests {
                 eth_address: r.eth_address.clone(),
                 internal_permission: "manage_groups".to_string(),
             },
-            u.token.clone().token,
-        ).unwrap();
+            u.token.clone().token.as_str(),
+        )
+        .unwrap();
     }
 
     #[test]
@@ -388,7 +382,7 @@ mod tests {
         let seed_user = seed::user_journey(&conn);
         let seed_token = seed::auth_token(&conn, seed_user);
 
-        let user = endpoints::introspection(&conn, seed_token.token.0.to_string());
+        let user = endpoints::introspection(&conn, seed_token.token.0.to_string().as_str());
         println!("{}", user);
     }
 
@@ -399,7 +393,7 @@ mod tests {
         let seed_user = seed::user_journey(&conn);
         let seed_token = seed::auth_token(&conn, seed_user);
 
-        let token = endpoints::register_token(&conn, seed_token.token.0.to_string());
+        let token = endpoints::register_token(&conn, seed_token.token.0.to_string().as_str());
         println!("{}", token);
     }
 

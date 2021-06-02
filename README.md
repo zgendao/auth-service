@@ -16,4 +16,6 @@ Generic authentication and authorization service based on Ethereum wallets
 $ docker-compose up -d
 $ docker exec -it cockroachdb ./cockroach sql --insecure
 > CREATE DATABASE auth_service;
+
+$ diesel migration run # install diesel_cli
 ```

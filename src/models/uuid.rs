@@ -38,3 +38,9 @@ impl From<String> for Uuid {
         Uuid(uuid::Uuid::from_str(&*uuid).unwrap())
     }
 }
+
+impl From<&str> for Uuid {
+    fn from(uuid: &str) -> Self {
+        Uuid(uuid::Uuid::from_str(uuid).unwrap())
+    }
+}

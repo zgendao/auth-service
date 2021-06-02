@@ -9,7 +9,7 @@ use crate::models::users;
 use crate::models::uuid::Uuid;
 use std::ops::Add;
 
-pub(crate) fn permission(conn: &PgConnection) -> permissions::Permission {
+pub fn permission(conn: &PgConnection) -> permissions::Permission {
     permissions::PermissionForm {
         name: fakeit::password::generate(true, true, false, 5).add("_WRITE"),
         created_at: SystemTime::now(),
@@ -18,7 +18,7 @@ pub(crate) fn permission(conn: &PgConnection) -> permissions::Permission {
     .insert(conn)
 }
 
-pub(crate) fn group(conn: &PgConnection) -> groups::Group {
+pub fn group(conn: &PgConnection) -> groups::Group {
     groups::GroupForm {
         name: fakeit::password::generate(true, true, false, 10),
         description: Some("Random group".to_string()),
@@ -28,7 +28,7 @@ pub(crate) fn group(conn: &PgConnection) -> groups::Group {
     .insert(conn)
 }
 
-pub(crate) fn user(conn: &PgConnection) -> users::User {
+pub fn user(conn: &PgConnection) -> users::User {
     users::UserForm {
         internal_permissions: crate::core::internal_permissions::Permissions::max(),
         eth_address: Some(fakeit::password::generate(true, true, false, 32)),
@@ -39,7 +39,7 @@ pub(crate) fn user(conn: &PgConnection) -> users::User {
     .insert(conn)
 }
 
-pub(crate) fn user_group(
+pub fn user_group(
     conn: &PgConnection,
     u_id: Uuid,
     g_id: Uuid,
@@ -55,16 +55,16 @@ pub(crate) fn user_group(
     .insert(conn)
 }
 
-pub(crate) fn user_journey(conn: &PgConnection) -> users::User {
+pub fn user_journey(conn: &PgConnection) -> users::User {
     let p = permission(conn);
     let g = group(conn);
     let u = user(conn);
-    user_group(conn, u.clone().id, g.clone().id, p.clone().id);
+    user_group(conn, u.id, g.id, p.id);
 
     u
 }
 
-pub(crate) fn auth_token(conn: &PgConnection, u: users::User) -> tokens::Token {
+pub fn auth_token(conn: &PgConnection, u: users::User) -> tokens::Token {
     tokens::TokenForm {
         token_type: tokens::AUTH_TYPE.to_string(),
         user_id: u.id,
