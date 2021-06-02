@@ -107,15 +107,16 @@ fn register_base(
         token.delete(conn).unwrap();
     }
 
+    let eth_address = register.eth_address.as_str();
     let mut u = users::UserForm {
         internal_permissions: 0,
-        eth_address: Some(register.eth_address.clone()),
+        eth_address: Some(eth_address.to_string()),
         signature: Some(register.signature),
         created_at: SystemTime::now(),
         deleted_at: None,
     };
 
-    if admin_account == register.eth_address.clone() {
+    if admin_account == eth_address.to_string() {
         u.internal_permissions = internal_permissions::Permissions::max();
     }
 
