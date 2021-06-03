@@ -41,7 +41,7 @@ pub fn introspection(conn: &PgConnection, token: &str) -> String {
 }
 
 fn introspection_base(conn: &PgConnection, token: &str) -> Result<response::User, response::Error> {
-    let t = match tokens::Token::get_by_token(Uuid::from(token), conn) {
+    let t = match tokens::Token::get_by_token(Uuid::from(token.to_string()), conn) {
         Ok(t) => t,
         Err(e) => return Err(response::Error::new(e)),
     };
@@ -68,7 +68,7 @@ fn register_token_base(
     {
         return Ok(response::Token::new_register(
             conn,
-            Uuid::from(user.user_id),
+            Uuid::from(user.user_id.to_string()),
         ));
     }
     Err(response::Error::new("forbidden (MANAGE_USERS)".to_string()))
@@ -90,7 +90,7 @@ fn register_base(
         Err(_) => "".to_string(),
     };
     if admin_account != register.eth_address {
-        let token = match tokens::Token::get_by_token(Uuid::from(register.register_token), conn) {
+        let token = match tokens::Token::get_by_token(Uuid::from(register.register_token.to_string()), conn) {
             Ok(t) => t,
             Err(_) => {
                 return Err(response::Error::new("token not existing".to_string()));
@@ -383,7 +383,7 @@ mod tests {
         let seed_user = seed::user_journey(&conn);
         let seed_token = seed::auth_token(&conn, seed_user);
 
-        let user = endpoints::introspection(&conn, seed_token.token.0.to_string().as_str());
+        let user = endpoints::introspection(&conn, seed_token.token.to_string().as_str());
         println!("{}", user);
     }
 
@@ -394,7 +394,7 @@ mod tests {
         let seed_user = seed::user_journey(&conn);
         let seed_token = seed::auth_token(&conn, seed_user);
 
-        let token = endpoints::register_token(&conn, seed_token.token.0.to_string().as_str());
+        let token = endpoints::register_token(&conn, seed_token.token.to_string().as_str());
         println!("{}", token);
     }
 

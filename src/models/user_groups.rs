@@ -75,12 +75,12 @@ mod tests {
 
     #[test]
     fn test_group_insert() {
-        let user_id = Uuid::from(uuid::Uuid::new_v4());
-        let group_id = Uuid::from(uuid::Uuid::new_v4());
+        let user_id = Uuid::new();
+        let group_id = Uuid::new();
         let ug = UserGroupForm {
             user_id,
             group_id,
-            permission_id: Uuid::from(uuid::Uuid::new_v4()),
+            permission_id: Uuid::new(),
             created_at: SystemTime::now(),
             deleted_at: None,
         };
@@ -91,7 +91,7 @@ mod tests {
         let ug = UserGroupForm {
             user_id,
             group_id,
-            permission_id: Uuid::from(uuid::Uuid::new_v4()),
+            permission_id: Uuid::new(),
             created_at: SystemTime::now(),
             deleted_at: None,
         };
@@ -99,7 +99,7 @@ mod tests {
         let ug = UserGroupForm {
             user_id,
             group_id,
-            permission_id: Uuid::from(uuid::Uuid::new_v4()),
+            permission_id: Uuid::new(),
             created_at: SystemTime::now(),
             deleted_at: None,
         };
