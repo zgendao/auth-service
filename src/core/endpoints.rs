@@ -64,7 +64,8 @@ fn register_token_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .iter().any(|item| item == internal_permissions::MANAGE_USERS)
+        .iter()
+        .any(|item| item == internal_permissions::MANAGE_USERS)
     {
         return Ok(response::Token::new_register(
             conn,
@@ -141,7 +142,8 @@ fn create_group_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .iter().any(|item| item == internal_permissions::MANAGE_GROUPS)
+        .iter()
+        .any(|item| item == internal_permissions::MANAGE_GROUPS)
     {
         let g = groups::GroupForm {
             name: group.name,
@@ -176,7 +178,8 @@ fn create_permission_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .iter().any(|item| item == internal_permissions::MANAGE_PERMISSIONS)
+        .iter()
+        .any(|item| item == internal_permissions::MANAGE_PERMISSIONS)
     {
         let p = permissions::PermissionForm {
             name: permission.name,
@@ -206,7 +209,8 @@ fn add_user_group_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .iter().any(|item| item == internal_permissions::MANAGE_USERS)
+        .iter()
+        .any(|item| item == internal_permissions::MANAGE_USERS)
     {
         let u = users::User::get_by_eth_address(user_group.eth_address, conn).unwrap();
         let g = groups::Group::get_by_name(user_group.group_name, conn).unwrap();

@@ -40,8 +40,8 @@ impl FromSql<UuidDiesel, Pg> for Uuid {
 }
 
 impl<T> From<T> for Uuid
-    where
-        T: AsRef<str> + Sized,
+where
+    T: AsRef<str> + Sized,
 {
     fn from(uuid: T) -> Self {
         Self(uuid::Uuid::from_str(uuid.as_ref()).unwrap())
