@@ -15,7 +15,7 @@ pub struct Uuid(uuid::Uuid);
 
 impl Uuid {
     pub fn new() -> Self {
-        Uuid::from(uuid::Uuid::new_v4().to_string())
+        Self(uuid::Uuid::new_v4())
     }
 }
 

@@ -41,7 +41,7 @@ pub fn introspection(conn: &PgConnection, token: &str) -> String {
 }
 
 fn introspection_base(conn: &PgConnection, token: &str) -> Result<response::User, response::Error> {
-    let t = match tokens::Token::get_by_token(Uuid::from(token.to_string()), conn) {
+    let t = match tokens::Token::get_by_token(Uuid::from(token), conn) {
         Ok(t) => t,
         Err(e) => return Err(response::Error::new(e)),
     };
@@ -64,11 +64,11 @@ fn register_token_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .contains(&internal_permissions::MANAGE_USERS.to_string())
+        .iter().any(|item| item == internal_permissions::MANAGE_USERS)
     {
         return Ok(response::Token::new_register(
             conn,
-            Uuid::from(user.user_id.to_string()),
+            Uuid::from(user.user_id),
         ));
     }
     Err(response::Error::new("forbidden (MANAGE_USERS)".to_string()))
@@ -90,7 +90,7 @@ fn register_base(
         Err(_) => "".to_string(),
     };
     if admin_account != register.eth_address {
-        let token = match tokens::Token::get_by_token(Uuid::from(register.register_token.to_string()), conn) {
+        let token = match tokens::Token::get_by_token(Uuid::from(register.register_token), conn) {
             Ok(t) => t,
             Err(_) => {
                 return Err(response::Error::new("token not existing".to_string()));
@@ -116,7 +116,7 @@ fn register_base(
         deleted_at: None,
     };
 
-    if admin_account == eth_address.to_string() {
+    if admin_account == eth_address {
         u.internal_permissions = internal_permissions::Permissions::max();
     }
 
@@ -141,7 +141,7 @@ fn create_group_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .contains(&internal_permissions::MANAGE_GROUPS.to_string())
+        .iter().any(|item| item == internal_permissions::MANAGE_GROUPS)
     {
         let g = groups::GroupForm {
             name: group.name,
@@ -176,7 +176,7 @@ fn create_permission_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .contains(&internal_permissions::MANAGE_PERMISSIONS.to_string())
+        .iter().any(|item| item == internal_permissions::MANAGE_PERMISSIONS)
     {
         let p = permissions::PermissionForm {
             name: permission.name,
@@ -206,7 +206,7 @@ fn add_user_group_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .contains(&internal_permissions::MANAGE_USERS.to_string())
+        .iter().any(|item| item == internal_permissions::MANAGE_USERS)
     {
         let u = users::User::get_by_eth_address(user_group.eth_address, conn).unwrap();
         let g = groups::Group::get_by_name(user_group.group_name, conn).unwrap();

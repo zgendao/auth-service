@@ -51,28 +51,28 @@ impl Permissions {
 
     pub fn from_vec(f: Vec<String>) -> Self {
         let mut p = Permissions::default();
-        if f.contains(&MANAGE_PERMISSIONS.to_string()) {
+        if f.iter().any(|item| item == MANAGE_PERMISSIONS) {
             p.manage_permissions = true;
         }
-        if f.contains(&MANAGE_USERS.to_string()) {
+        if f.iter().any(|item| item == MANAGE_USERS) {
             p.manage_users = true;
         }
-        if f.contains(&MANAGE_GROUPS.to_string()) {
+        if f.iter().any(|item| item == MANAGE_GROUPS) {
             p.manage_groups = true;
         }
-        if f.contains(&MANAGE_TOKENS.to_string()) {
+        if f.iter().any(|item| item == MANAGE_TOKENS) {
             p.manage_tokens = true;
         }
-        if f.contains(&SET_INTERNAL_PERMISSIONS.to_string()) {
+        if f.iter().any(|item| item == SET_INTERNAL_PERMISSIONS) {
             p.set_internal_permissions = true;
         }
-        if f.contains(&GET_USERS.to_string()) {
+        if f.iter().any(|item| item == GET_USERS) {
             p.get_users = true;
         }
-        if f.contains(&GET_GROUPS.to_string()) {
+        if f.iter().any(|item| item == GET_GROUPS) {
             p.get_groups = true;
         }
-        if f.contains(&GET_PERMISSIONS.to_string()) {
+        if f.iter().any(|item| item == GET_PERMISSIONS) {
             p.get_permissions = true;
         }
         p

@@ -52,8 +52,8 @@ impl User {
         for ug_elem in ug.iter() {
             let g = groups::Group::get_by_id(ug_elem.group_id, conn).unwrap();
             let p = permissions::Permission::get_by_id(ug_elem.permission_id, conn).unwrap();
-            if self.groups.contains_key(&*g.id.to_string()) {
-                let g_mut = self.groups.get_mut(&*g.id.to_string()).unwrap();
+            if self.groups.contains_key(&g.id.to_string()) {
+                let g_mut = self.groups.get_mut(&g.id.to_string()).unwrap();
                 g_mut
                     .permissions
                     .insert(p.id.to_string(), Permission { name: p.name });
