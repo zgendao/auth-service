@@ -23,10 +23,7 @@ impl UserGroup {
         user_groups
             .filter(id.eq(p_id))
             .first::<Self>(conn)
-            .map_or_else(
-                |_| Err("UserGroup doesn't exist".to_string()),
-                |user_group| Ok(user_group),
-            )
+            .map_or_else(|_| Err("UserGroup doesn't exist".to_string()), Ok)
     }
 
     pub fn get_by_user_id(p_user_id: Uuid, conn: &PgConnection) -> Result<Vec<Self>, String> {
@@ -34,10 +31,7 @@ impl UserGroup {
         user_groups
             .filter(user_id.eq(p_user_id))
             .load::<Self>(conn)
-            .map_or_else(
-                |_| Err("UserGroup doesn't exist".to_string()),
-                |user_group| Ok(user_group),
-            )
+            .map_or_else(|_| Err("UserGroup doesn't exist".to_string()), Ok)
     }
 }
 

@@ -52,21 +52,20 @@ impl User {
         for ug_elem in ug.iter() {
             let g = groups::Group::get_by_id(ug_elem.group_id, conn).unwrap();
             let p = permissions::Permission::get_by_id(ug_elem.permission_id, conn).unwrap();
-            if self.groups.contains_key(&g.id.to_string()) {
+            if let std::collections::hash_map::Entry::Vacant(e) =
+                self.groups.entry(g.id.to_string())
+            {
+                let mut permissions = HashMap::<String, Permission>::new();
+                permissions.insert(p.id.to_string(), Permission { name: p.name });
+                e.insert(Group {
+                    name: g.name,
+                    permissions,
+                });
+            } else {
                 let g_mut = self.groups.get_mut(&g.id.to_string()).unwrap();
                 g_mut
                     .permissions
                     .insert(p.id.to_string(), Permission { name: p.name });
-            } else {
-                let mut permissions = HashMap::<String, Permission>::new();
-                permissions.insert(p.id.to_string(), Permission { name: p.name });
-                self.groups.insert(
-                    g.id.to_string(),
-                    Group {
-                        name: g.name,
-                        permissions,
-                    },
-                );
             }
         }
     }
@@ -115,14 +114,13 @@ impl Token {
     }
 
     fn save_token(conn: &PgConnection, user_id: uuid::Uuid, t: String) -> tokens::Token {
-        let token = tokens::TokenForm {
+        tokens::TokenForm {
             token_type: t,
             user_id,
             created_at: SystemTime::now(),
             expires_at: SystemTime::now(),
         }
-        .insert(conn);
-        token
+        .insert(conn)
     }
 }
 

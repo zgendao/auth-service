@@ -21,10 +21,7 @@ impl Permission {
         permissions
             .filter(id.eq(p_id))
             .first::<Self>(conn)
-            .map_or_else(
-                |_| Err("Permission doesn't exist".to_string()),
-                |permission| Ok(permission),
-            )
+            .map_or_else(|_| Err("Permission doesn't exist".to_string()), Ok)
     }
 
     pub fn get_by_name(p_name: String, conn: &PgConnection) -> Result<Self, String> {
@@ -32,10 +29,7 @@ impl Permission {
         permissions
             .filter(name.eq(p_name))
             .first::<Self>(conn)
-            .map_or_else(
-                |_| Err("Permission doesn't exist".to_string()),
-                |permission| Ok(permission),
-            )
+            .map_or_else(|_| Err("Permission doesn't exist".to_string()), Ok)
     }
 }
 
