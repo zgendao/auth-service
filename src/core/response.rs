@@ -115,14 +115,13 @@ impl Token {
     }
 
     fn save_token(conn: &PgConnection, user_id: uuid::Uuid, t: String) -> tokens::Token {
-        let token = tokens::TokenForm {
+        tokens::TokenForm {
             token_type: t,
             user_id,
             created_at: SystemTime::now(),
             expires_at: SystemTime::now(),
         }
-        .insert(conn);
-        token
+        .insert(conn)
     }
 }
 

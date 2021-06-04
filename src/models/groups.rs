@@ -19,10 +19,10 @@ pub struct Group {
 impl Group {
     pub fn get_by_id(p_id: Uuid, conn: &PgConnection) -> Result<Self, String> {
         use crate::models::schema::groups::dsl::*;
-        groups.filter(id.eq(p_id)).first::<Self>(conn).map_or_else(
-            |_| Err("Group doesn't exist".to_string()),
-            |group| Ok(group),
-        )
+        groups
+            .filter(id.eq(p_id))
+            .first::<Self>(conn)
+            .map_or_else(|_| Err("Group doesn't exist".to_string()), Ok)
     }
 
     pub fn get_by_name(p_name: String, conn: &PgConnection) -> Result<Self, String> {
@@ -30,10 +30,7 @@ impl Group {
         groups
             .filter(name.eq(p_name))
             .first::<Self>(conn)
-            .map_or_else(
-                |_| Err("Group doesn't exist".to_string()),
-                |group| Ok(group),
-            )
+            .map_or_else(|_| Err("Group doesn't exist".to_string()), Ok)
     }
 }
 

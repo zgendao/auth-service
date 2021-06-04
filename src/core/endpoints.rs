@@ -23,7 +23,7 @@ fn login_base(
     conn: &PgConnection,
     login: request::Login,
 ) -> Result<response::User, response::Error> {
-    match users::User::get_by_eth_address(login.eth_address.clone(), conn) {
+    match users::User::get_by_eth_address(login.eth_address, conn) {
         Ok(u) => {
             let mut user = response::User::new();
             user.build(conn, u.id);
