@@ -64,7 +64,8 @@ fn register_token_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .contains(&internal_permissions::MANAGE_USERS.to_string())
+        .iter()
+        .any(|item| item == internal_permissions::MANAGE_USERS)
     {
         return Ok(response::Token::new_register(
             conn,
@@ -116,7 +117,7 @@ fn register_base(
         deleted_at: None,
     };
 
-    if admin_account == eth_address.to_string() {
+    if admin_account == eth_address {
         u.internal_permissions = internal_permissions::Permissions::max();
     }
 
@@ -141,7 +142,8 @@ fn create_group_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .contains(&internal_permissions::MANAGE_GROUPS.to_string())
+        .iter()
+        .any(|item| item == internal_permissions::MANAGE_GROUPS)
     {
         let g = groups::GroupForm {
             name: group.name,
@@ -176,7 +178,8 @@ fn create_permission_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .contains(&internal_permissions::MANAGE_PERMISSIONS.to_string())
+        .iter()
+        .any(|item| item == internal_permissions::MANAGE_PERMISSIONS)
     {
         let p = permissions::PermissionForm {
             name: permission.name,
@@ -206,7 +209,8 @@ fn add_user_group_base(
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
-        .contains(&internal_permissions::MANAGE_USERS.to_string())
+        .iter()
+        .any(|item| item == internal_permissions::MANAGE_USERS)
     {
         let u = users::User::get_by_eth_address(user_group.eth_address, conn).unwrap();
         let g = groups::Group::get_by_name(user_group.group_name, conn).unwrap();
@@ -383,7 +387,7 @@ mod tests {
         let seed_user = seed::user_journey(&conn);
         let seed_token = seed::auth_token(&conn, seed_user);
 
-        let user = endpoints::introspection(&conn, seed_token.token.0.to_string().as_str());
+        let user = endpoints::introspection(&conn, seed_token.token.to_string().as_str());
         println!("{}", user);
     }
 
@@ -394,7 +398,7 @@ mod tests {
         let seed_user = seed::user_journey(&conn);
         let seed_token = seed::auth_token(&conn, seed_user);
 
-        let token = endpoints::register_token(&conn, seed_token.token.0.to_string().as_str());
+        let token = endpoints::register_token(&conn, seed_token.token.to_string().as_str());
         println!("{}", token);
     }
 

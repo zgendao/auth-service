@@ -11,7 +11,19 @@ use uuid;
     Clone, Debug, AsExpression, PartialEq, FromSqlRow, Serialize, Deserialize, Hash, Eq, Copy,
 )]
 #[sql_type = "UuidDiesel"]
-pub struct Uuid(pub uuid::Uuid);
+pub struct Uuid(uuid::Uuid);
+
+impl Uuid {
+    pub fn new() -> Self {
+        Self(uuid::Uuid::new_v4())
+    }
+}
+
+impl std::fmt::Display for Uuid {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.to_string())
+    }
+}
 
 impl ToSql<UuidDiesel, Pg> for Uuid {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
@@ -27,20 +39,11 @@ impl FromSql<UuidDiesel, Pg> for Uuid {
     }
 }
 
-impl From<uuid::Uuid> for Uuid {
-    fn from(uuid: uuid::Uuid) -> Self {
-        Uuid(uuid)
-    }
-}
-
-impl From<String> for Uuid {
-    fn from(uuid: String) -> Self {
-        Uuid(uuid::Uuid::from_str(&*uuid).unwrap())
-    }
-}
-
-impl From<&str> for Uuid {
-    fn from(uuid: &str) -> Self {
-        Uuid(uuid::Uuid::from_str(uuid).unwrap())
+impl<T> From<T> for Uuid
+where
+    T: AsRef<str> + Sized,
+{
+    fn from(uuid: T) -> Self {
+        Self(uuid::Uuid::from_str(uuid.as_ref()).unwrap())
     }
 }

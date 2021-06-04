@@ -81,7 +81,7 @@ mod tests {
         println!("{:?}", group);
         match Group::get_by_id(group.id.clone(), &conn) {
             Ok(q_group) => {
-                assert_eq!(q_group.id.0.to_string(), group.id.0.to_string());
+                assert_eq!(q_group.id.to_string(), group.id.to_string());
                 assert_eq!(q_group.name, group.name);
             }
             Err(err) => {

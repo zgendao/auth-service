@@ -36,7 +36,7 @@ impl User {
         self.build_groups(conn, ug);
         self.token = Token::new_auth(conn, user_id);
         self.eth_address = u.eth_address.unwrap();
-        self.user_id = u.id.0.to_string();
+        self.user_id = u.id.to_string();
         self.internal_permissions =
             internal_permissions::Permissions::from(u.internal_permissions).to_vec();
     }
@@ -52,16 +52,16 @@ impl User {
         for ug_elem in ug.iter() {
             let g = groups::Group::get_by_id(ug_elem.group_id, conn).unwrap();
             let p = permissions::Permission::get_by_id(ug_elem.permission_id, conn).unwrap();
-            if self.groups.contains_key(&*g.id.0.to_string()) {
-                let g_mut = self.groups.get_mut(&*g.id.0.to_string()).unwrap();
+            if self.groups.contains_key(&g.id.to_string()) {
+                let g_mut = self.groups.get_mut(&g.id.to_string()).unwrap();
                 g_mut
                     .permissions
-                    .insert(p.id.0.to_string(), Permission { name: p.name });
+                    .insert(p.id.to_string(), Permission { name: p.name });
             } else {
                 let mut permissions = HashMap::<String, Permission>::new();
-                permissions.insert(p.id.0.to_string(), Permission { name: p.name });
+                permissions.insert(p.id.to_string(), Permission { name: p.name });
                 self.groups.insert(
-                    g.id.0.to_string(),
+                    g.id.to_string(),
                     Group {
                         name: g.name,
                         permissions,
@@ -95,7 +95,7 @@ impl Token {
         let dt = DateTime::<Utc>::from(token.expires_at);
 
         Token {
-            token: token.token.0.to_string(),
+            token: token.token.to_string(),
             expires_at: dt.to_rfc3339(),
         }
     }
@@ -105,7 +105,7 @@ impl Token {
         let dt = DateTime::<Utc>::from(token.expires_at);
 
         Token {
-            token: token.token.0.to_string(),
+            token: token.token.to_string(),
             expires_at: dt.to_rfc3339(),
         }
     }
