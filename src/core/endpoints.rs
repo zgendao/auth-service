@@ -388,7 +388,8 @@ mod tests {
         let seed_token = seed::auth_token(&conn, seed_user);
 
         let user = endpoints::introspection(&conn, seed_token.token.to_string().as_str());
-        println!("{}", user);
+        assert_eq!(724, user.len());
+        println!("{}", user.len());
     }
 
     #[test]

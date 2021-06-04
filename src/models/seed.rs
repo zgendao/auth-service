@@ -61,6 +61,12 @@ pub fn user_journey(conn: &PgConnection) -> users::User {
     let u = user(conn);
     user_group(conn, u.id, g.id, p.id);
 
+    let p1 = permission(conn);
+    let p2 = permission(conn);
+    let g = group(conn);
+    user_group(conn, u.id, g.id, p1.id);
+    user_group(conn, u.id, g.id, p2.id);
+
     u
 }
 
