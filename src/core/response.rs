@@ -11,9 +11,6 @@ use crate::models::users;
 use crate::models::uuid;
 use std::ops::Add;
 
-const LONG_TOKEN_EXPIRATION: DateTime<Utc> =
-    DateTime::<Utc>::from(SystemTime::now().add(Duration::new(31_556_952, 0)));
-
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct User {
     pub user_id: String,
@@ -114,8 +111,10 @@ impl Token {
     }
 
     pub fn new_long(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
+        let token_expires_at =
+            DateTime::<Utc>::from(SystemTime::now().add(Duration::new(31_556_952, 0)));
         let token = Token::save_token(conn, user_id, tokens::LONG_TYPE.to_string());
-        let dt = LONG_TOKEN_EXPIRATION;
+        let dt = token_expires_at;
 
         Token {
             token: token.token.to_string(),

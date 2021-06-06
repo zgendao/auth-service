@@ -45,6 +45,7 @@ fn introspection_base(conn: &PgConnection, token: &str) -> Result<response::User
         Ok(t) => t,
         Err(e) => return Err(response::Error::new(e)),
     };
+    // TODO if token is long token then we return other response
     let mut user = response::User::new();
     user.build(conn, t.user_id);
     Ok(user)
@@ -272,22 +273,18 @@ pub fn long_token(conn: &PgConnection, token: &str) -> String {
     }
 }
 
-fn long_token_base(
-    conn: &PgConnection,
-    token: &str,
-) -> Result<response::Token, response::Error> {
+fn long_token_base(conn: &PgConnection, token: &str) -> Result<response::Token, response::Error> {
     let user = introspection_base(conn, token)?;
     if user
         .internal_permissions
         .iter()
-        .any(|item| item == internal_permissions::MANAGE_USERS)
+        .any(|item| item == internal_permissions::MANAGE_LONG_TOKEN)
     {
-        return Ok(response::Token::new_long(
-            conn,
-            Uuid::from(user.user_id),
-        ));
+        return Ok(response::Token::new_long(conn, Uuid::from(user.user_id)));
     }
-    Err(response::Error::new("forbidden (MANAGE_USERS)".to_string()))
+    Err(response::Error::new(
+        "forbidden (MANAGE_LONG_TOKEN)".to_string(),
+    ))
 }
 
 #[cfg(test)]

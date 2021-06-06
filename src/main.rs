@@ -110,10 +110,10 @@ fn add_user_internal_permission(
 /// Create long token
 ///
 /// Long token is a long-lived token used for secure API authentication. It will have the same
-/// permission set as the user who creates it.
+/// permission set as the user who creates it. Requires `manage_long_token` internal permission.
 #[post("/tokens/long")]
-fn create_long_token(conn: utils::connection::DbConn, auth: Authorization) {
-
+fn create_long_token(conn: utils::connection::DbConn, auth: Authorization) -> String {
+    core::endpoints::long_token(&*conn.0, auth.0)
 }
 
 /// Get permissions endpoint

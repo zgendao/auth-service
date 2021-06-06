@@ -6,6 +6,7 @@ pub const SET_INTERNAL_PERMISSIONS: &str = "set_internal_permissions"; // << 5
 pub const GET_USERS: &str = "get_users"; // << 6
 pub const GET_GROUPS: &str = "get_groups"; // << 7
 pub const GET_PERMISSIONS: &str = "get_permissions"; // << 8
+pub const MANAGE_LONG_TOKEN: &str = "manage_long_token"; // << 9
 
 #[derive(Default)]
 pub struct Permissions {
@@ -17,6 +18,7 @@ pub struct Permissions {
     pub get_users: bool,
     pub get_groups: bool,
     pub get_permissions: bool,
+    pub manage_long_token: bool,
 }
 
 impl Permissions {
@@ -45,6 +47,9 @@ impl Permissions {
         }
         if f & (1 << 8) != 0 {
             p.get_permissions = true;
+        }
+        if f & (1 << 9) != 0 {
+            p.manage_long_token = true;
         }
         p
     }
@@ -75,6 +80,9 @@ impl Permissions {
         if f.iter().any(|item| item == GET_PERMISSIONS) {
             p.get_permissions = true;
         }
+        if f.iter().any(|item| item == MANAGE_LONG_TOKEN) {
+            p.manage_long_token = true;
+        }
         p
     }
 
@@ -103,6 +111,9 @@ impl Permissions {
         }
         if self.get_permissions {
             n += 1 << 8;
+        }
+        if self.manage_long_token {
+            n += 1 << 9;
         }
         n
     }
@@ -133,6 +144,9 @@ impl Permissions {
         if self.get_permissions {
             n.push(GET_PERMISSIONS.to_string())
         }
+        if self.manage_long_token {
+            n.push(MANAGE_LONG_TOKEN.to_string())
+        }
         n
     }
 
@@ -146,6 +160,7 @@ impl Permissions {
             get_users: true,
             get_groups: true,
             get_permissions: true,
+            manage_long_token: true,
         }
         .to_number()
     }
@@ -174,6 +189,7 @@ mod tests {
         assert_eq!(p.get_users, false);
         assert_eq!(p.get_groups, true);
         assert_eq!(p.get_permissions, false);
+        assert_eq!(p.manage_long_token, false);
     }
 
     #[test]
