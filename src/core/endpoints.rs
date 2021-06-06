@@ -265,6 +265,31 @@ fn add_user_internal_permission_base(
     ))
 }
 
+pub fn long_token(conn: &PgConnection, token: &str) -> String {
+    match long_token_base(conn, token) {
+        Ok(t) => t.parse(),
+        Err(e) => e.parse(),
+    }
+}
+
+fn long_token_base(
+    conn: &PgConnection,
+    token: &str,
+) -> Result<response::Token, response::Error> {
+    let user = introspection_base(conn, token)?;
+    if user
+        .internal_permissions
+        .iter()
+        .any(|item| item == internal_permissions::MANAGE_USERS)
+    {
+        return Ok(response::Token::new_long(
+            conn,
+            Uuid::from(user.user_id),
+        ));
+    }
+    Err(response::Error::new("forbidden (MANAGE_USERS)".to_string()))
+}
+
 #[cfg(test)]
 mod tests {
     use diesel::{pg::PgConnection, prelude::*};

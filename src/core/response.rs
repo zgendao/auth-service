@@ -2,13 +2,17 @@ use chrono::{DateTime, Utc};
 use diesel::pg::PgConnection;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 
 use crate::core::internal_permissions;
 use crate::models::tokens;
 use crate::models::user_groups;
 use crate::models::users;
 use crate::models::uuid;
+use std::ops::Add;
+
+const LONG_TOKEN_EXPIRATION: DateTime<Utc> =
+    DateTime::<Utc>::from(SystemTime::now().add(Duration::new(31_556_952, 0)));
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct User {
@@ -102,6 +106,16 @@ impl Token {
     pub fn new_register(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
         let token = Token::save_token(conn, user_id, tokens::REGISTER_TYPE.to_string());
         let dt = DateTime::<Utc>::from(token.expires_at);
+
+        Token {
+            token: token.token.to_string(),
+            expires_at: dt.to_rfc3339(),
+        }
+    }
+
+    pub fn new_long(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
+        let token = Token::save_token(conn, user_id, tokens::LONG_TYPE.to_string());
+        let dt = LONG_TOKEN_EXPIRATION;
 
         Token {
             token: token.token.to_string(),

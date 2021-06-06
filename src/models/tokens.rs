@@ -8,6 +8,7 @@ use crate::models::uuid::Uuid;
 
 pub const AUTH_TYPE: &str = "auth";
 pub const REGISTER_TYPE: &str = "register";
+pub const LONG_TYPE: &str = "long";
 
 #[derive(Queryable, AsChangeset, Serialize, Debug)]
 #[table_name = "tokens"]
@@ -55,7 +56,7 @@ impl TokenForm {
         diesel::insert_into(tokens::table)
             .values(self)
             .get_result(conn)
-            .expect("error inserting tokan")
+            .expect("error inserting token")
     }
 }
 
