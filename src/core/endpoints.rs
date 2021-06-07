@@ -1,5 +1,7 @@
+use chrono::{DateTime, Utc};
 use diesel::pg::PgConnection;
 use std::env;
+use std::time::SystemTime;
 
 use crate::core::internal_permissions;
 use crate::core::request;
@@ -10,7 +12,6 @@ use crate::models::tokens;
 use crate::models::user_groups;
 use crate::models::users;
 use crate::models::uuid::Uuid;
-use std::time::SystemTime;
 
 pub fn login(conn: &PgConnection, login: request::Login) -> String {
     match login_base(conn, login) {
@@ -27,6 +28,7 @@ fn login_base(
         Ok(u) => {
             let mut user = response::User::new();
             user.build(conn, u.id);
+            user.token = response::Token::new_auth(conn, u.id);
             Ok(user)
         }
         Err(err) => Err(response::Error::new(err)),
@@ -45,9 +47,17 @@ fn introspection_base(conn: &PgConnection, token: &str) -> Result<response::User
         Ok(t) => t,
         Err(e) => return Err(response::Error::new(e)),
     };
-    // TODO if token is long token then we return other response
+
     let mut user = response::User::new();
     user.build(conn, t.user_id);
+    user.token = response::Token {
+        token: t.token.to_string(),
+        expires_at: DateTime::<Utc>::from(t.expires_at).to_rfc3339(),
+        valid: false,
+    };
+    if t.expires_at > SystemTime::now() {
+        user.token.valid = true;
+    }
     Ok(user)
 }
 
@@ -125,6 +135,7 @@ fn register_base(
     let saved_u = u.insert(conn);
     let mut response_u = response::User::new();
     response_u.build(conn, saved_u.id);
+    response_u.token = response::Token::new_auth(conn, saved_u.id);
     Ok(response_u)
 }
 
@@ -410,8 +421,8 @@ mod tests {
         let seed_token = seed::auth_token(&conn, seed_user);
 
         let user = endpoints::introspection(&conn, seed_token.token.to_string().as_str());
-        assert_eq!(724, user.len());
-        println!("{}", user.len());
+        assert_eq!(757, user.len());
+        println!("{}", user);
     }
 
     #[test]
