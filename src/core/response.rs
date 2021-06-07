@@ -2,13 +2,14 @@ use chrono::{DateTime, Utc};
 use diesel::pg::PgConnection;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 
 use crate::core::internal_permissions;
 use crate::models::tokens;
 use crate::models::user_groups;
 use crate::models::users;
 use crate::models::uuid;
+use std::ops::Add;
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct User {
@@ -34,7 +35,6 @@ impl User {
         let ug = user_groups::UserGroup::get_by_user_id(user_id, &conn).unwrap();
         let u = users::User::get_by_id(user_id, conn).unwrap();
         self.build_groups(conn, ug);
-        self.token = Token::new_auth(conn, user_id);
         self.eth_address = u.eth_address.unwrap();
         self.user_id = u.id.to_string();
         self.internal_permissions =
@@ -86,26 +86,56 @@ pub struct Permission {
 pub struct Token {
     pub token: String,
     pub expires_at: String,
+    pub valid: bool,
 }
 
 impl Token {
     pub fn new_auth(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
-        let token = Token::save_token(conn, user_id, tokens::AUTH_TYPE.to_string());
+        let token = Token::save_token(
+            conn,
+            user_id,
+            tokens::AUTH_TYPE.to_string(),
+            SystemTime::now().add(Duration::new(86_400, 0)),
+        );
         let dt = DateTime::<Utc>::from(token.expires_at);
 
         Token {
             token: token.token.to_string(),
             expires_at: dt.to_rfc3339(),
+            valid: true,
         }
     }
 
     pub fn new_register(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
-        let token = Token::save_token(conn, user_id, tokens::REGISTER_TYPE.to_string());
+        let token = Token::save_token(
+            conn,
+            user_id,
+            tokens::REGISTER_TYPE.to_string(),
+            SystemTime::now().add(Duration::new(86_400, 0)),
+        );
         let dt = DateTime::<Utc>::from(token.expires_at);
 
         Token {
             token: token.token.to_string(),
             expires_at: dt.to_rfc3339(),
+            valid: true,
+        }
+    }
+
+    pub fn new_long(conn: &PgConnection, user_id: uuid::Uuid) -> Token {
+        let token_expires_at = SystemTime::now().add(Duration::new(31_556_952, 0));
+        let token = Token::save_token(
+            conn,
+            user_id,
+            tokens::LONG_TYPE.to_string(),
+            token_expires_at,
+        );
+        let dt = DateTime::<Utc>::from(token_expires_at);
+
+        Token {
+            token: token.token.to_string(),
+            expires_at: dt.to_rfc3339(),
+            valid: true,
         }
     }
 
@@ -113,12 +143,17 @@ impl Token {
         serde_json::to_string(self).unwrap()
     }
 
-    fn save_token(conn: &PgConnection, user_id: uuid::Uuid, t: String) -> tokens::Token {
+    fn save_token(
+        conn: &PgConnection,
+        user_id: uuid::Uuid,
+        t: String,
+        expires_at: SystemTime,
+    ) -> tokens::Token {
         tokens::TokenForm {
             token_type: t,
             user_id,
             created_at: SystemTime::now(),
-            expires_at: SystemTime::now(),
+            expires_at,
         }
         .insert(conn)
     }

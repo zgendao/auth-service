@@ -38,7 +38,7 @@ fn introspection(conn: utils::connection::DbConn, auth: Authorization) -> String
 /// Create registration token endpoint
 ///
 /// Creates a registration token for adding new users. Requires `manage_users` permission.
-#[post("/register_token")]
+#[post("/tokens/register")]
 fn register_token(conn: utils::connection::DbConn, auth: Authorization) -> String {
     core::endpoints::register_token(&*conn.0, auth.0)
 }
@@ -105,6 +105,15 @@ fn add_user_internal_permission(
     auth: Authorization,
 ) -> String {
     core::endpoints::add_user_internal_permission(&*conn.0, ug.0, auth.0)
+}
+
+/// Create long token
+///
+/// Long token is a long-lived token used for secure API authentication. It will have the same
+/// permission set as the user who creates it. Requires `manage_long_token` internal permission.
+#[post("/tokens/long")]
+fn create_long_token(conn: utils::connection::DbConn, auth: Authorization) -> String {
+    core::endpoints::long_token(&*conn.0, auth.0)
 }
 
 /// Get permissions endpoint
