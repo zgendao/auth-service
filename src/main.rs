@@ -38,7 +38,7 @@ fn introspection(conn: utils::connection::DbConn, auth: Authorization) -> String
 /// Create registration token endpoint
 ///
 /// Creates a registration token for adding new users. Requires `manage_users` permission.
-#[get("/tokens/register")]
+#[post("/tokens/register")]
 fn register_token(conn: utils::connection::DbConn, auth: Authorization) -> String {
     core::endpoints::register_token(&*conn.0, auth.0)
 }
