@@ -275,6 +275,126 @@ curl --location --request POST 'localhost:8000/auth/groups' \
 }
 ```
 
+### User permission
+
+`PUT /auth/users/permissions`
+
+This endpoint adds a certain permission to the user. Also, it requires a group, so it means the user will have the permission under the certain group.
+So users will have different permissions in different groups.
+It requires to have `manage_users` internal permission.
+
+#### Headers
+
+- `Authorization`: `{token_from_login_response}`
+
+#### Request
+
+- `eth_address`: The user's eth_address who we want to set the permission.
+- `group_name`: The name of the group where we want to set the permission.
+- `permission_name`: The name of the permission what we want the set.
+
+#### Response
+
+- `id`: The ID of the new entry. 
+- `user_id`: The user's internal ID.
+- `permission_id`: The group's internal ID.
+- `permission_id`: The permission's internal ID.
+
+#### Example
+
+```
+// Request
+curl --location --request PUT 'localhost:8000/auth/users/permissions' \
+--header 'Authorization: c9e8b521-67c5-4088-82e4-16cff94ff40e' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "eth_address": "5U82CEbfU32usa3UKCH2xr380noyo85a6",
+    "group_name": "test_amazing_group",
+    "permission_name": "service_READ"
+}'
+
+// Response
+200 OK
+{
+    "id": "de57e1bf-2c3b-44e2-b979-5b5a399b722b",
+    "user_id": "0a76cd79-aa86-468f-a32a-fbba2e9c0829",
+    "group_id": "0449d974-1aa6-435b-a2e8-05c55792bceb",
+    "permission_id": "01e0c0c1-d52d-4c9a-9a1d-4d75c378d280"
+}
+```
+
+### Add internal permission to the user
+
+`PUT /auth/users/internal-permissions`
+
+This endpoint adds one of the internal permissions to the user.
+It requires to have `set_internal_permissions` internal permission.
+
+#### Available internal permissions
+
+```
+- manage_permissions
+- manage_users
+- manage_groups
+- manage_tokens
+- set_internal_permissions
+- get_users
+- get_groups
+- get_permissions
+- manage_long_token
+```
+
+#### Headers
+
+- `Authorization`: `{token_from_login_response}`
+
+#### Request
+
+- `eth_address`: The user's eth_address who we want to set the internal permission.
+- `internal_permission`: One of the strings from above.
+
+#### Response
+
+- Returns a [User](#user) with the information of the token's owner.
+
+#### Example
+
+```
+// Request
+curl --location --request PUT 'localhost:8000/auth/users/internal-permissions' \
+--header 'Authorization: c9e8b521-67c5-4088-82e4-16cff94ff40e' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "eth_address": "5U82CEbfU32usa3UKCH2xr380noyo85a6",
+    "internal_permission": "manage_tokens"
+}'
+
+// Response
+200 OK
+{
+    "user_id": "0a76cd79-aa86-468f-a32a-fbba2e9c0829",
+    "groups": {
+        "0449d974-1aa6-435b-a2e8-05c55792bceb": {
+            "name": "test_amazing_group",
+            "permissions": {
+                "01e0c0c1-d52d-4c9a-9a1d-4d75c378d280": {
+                    "name": "service_READ"
+                }
+            }
+        }
+    },
+    "internal_permissions": [
+        "manage_tokens"
+    ],
+    "eth_address": "5U82CEbfU32usa3UKCH2xr380noyo85a6",
+    "token": {
+        "token": "",
+        "expires_at": "",
+        "valid": false
+    }
+}
+```
+
 ----------------------------------------------------------------
 
 ### Common structures
