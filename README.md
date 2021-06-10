@@ -2,13 +2,21 @@
 
 Generic authentication and authorization service based on Ethereum wallets
 
-## Login Mechanism
+## Flows
 
-1. Server asks the client to sign a hash with the private key
-2. Client signs the hash and sends it back alongside with the public key
-3. Server returns a token signed by the server.
-4a. Client send this to the app 
-4b. Apps can introspect the token from the server
+### Register Flow
+
+1. Someone who has permission, creates a [register token](#create-register-token-endpoint).
+2. User sign a string with the Wallet or Private Key and [send it alongside with the eth_address and register token](#register-endpoint).
+3. Final state, user created and logged in by the system. So returns the token. 
+
+### Login Flow
+
+1. User sign a string with the Wallet or Private Key and [send it alongside with the eth_address to the login endpoint](#login-endpoint).
+2. Returns the token and the information about the user.
+3. The user can use this token to authentication. The app which wants to authenticate the token will [send it to the introspection endpoint](#introspection).
+
+**NOTE: The "singed string" always MUST be te same.**
 
 ## Endpoints
 
@@ -395,7 +403,38 @@ curl --location --request PUT 'localhost:8000/auth/users/internal-permissions' \
 }
 ```
 
-----------------------------------------------------------------
+### Long-lived token
+
+`POST /tokens/long`
+
+Act as an API token, should store it securely. Expires after a year.
+It requires to have `manage_long_token` internal permission.
+
+#### Headers
+
+- `Authorization`: `{token_from_login_response}`
+
+#### Response
+
+- `token`: Long-lived token, this should be sent to the API caller.
+- `expires_at`: Time when the token expires.
+- `valid`: Boolean which always `true` in this case.
+
+#### Example
+
+```
+// Request
+curl --location --request POST 'localhost:8000/auth/tokens/long' \
+--header 'Authorization: e23fa9ba-1fe4-4ab5-9424-be33c84079cf'
+
+// Response
+200 OK
+{
+    "token": "4a278b0c-a00f-4bef-bb4c-d34b97a2b5ac",
+    "expires_at": "2021-06-09T20:57:56.696567+00:00",
+    "valid": true
+}
+```
 
 ### Common structures
 
