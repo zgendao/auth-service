@@ -76,7 +76,7 @@ curl --location --request POST 'localhost:8000/auth/login' \
 `POST /auth/tokens/register`
 
 Register token required for registration. So one of the member of the team can create a register token and send to the user securely, so it can register.
-It requires to have `manage_users` internal permission
+It requires to have `manage_users` internal permission.
 
 #### Headers
 
@@ -103,6 +103,179 @@ curl --location --request POST 'localhost:8000/auth/tokens/register' \
     "valid": true
 }
 ```
+
+### Register endpoint
+
+`POST /auth/register`
+
+After the user get the [register token](#create-register-token-endpoint) they can register. It can be done by sending the eth_address, and the signature alongside with the register token.
+Note, that the register is very strict, the first action is always to delete the register token even if the registration NOT finished properly.
+After registration the system automatically log in the user.
+
+#### Request
+
+- `eth_address`: The Ethereum address to sign in.
+- `signature`: The signature with Ethereum wallet or with any private key belongs to the Ethereum address.
+- `register_token`: The register token acquired by a member who has permission for that.
+
+#### Response
+
+- Returns a [User](#user) with the information of the user signed in.
+
+#### Example
+
+```
+// Request
+curl --location --request POST 'localhost:8000/auth/register' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "eth_address": "test1234123123123123123",
+    "signature": "test1234123123123123123",
+    "register_token":"02a387f2-e1b0-4437-a12e-e901d8d9373b"
+}'
+
+// Response 
+200 OK
+{
+    "user_id": "222e3bf3-7900-48e1-9e96-bf4a16562ab7",
+    "groups": {},
+    "internal_permissions": [],
+    "eth_address": "test1234123123123123123",
+    "token": {
+        "token": "54acf92e-247d-49d7-b2ae-955a678c9436",
+        "expires_at": "2021-06-10T18:49:00.163140+00:00",
+        "valid": true
+    }
+}
+```
+
+### Introspection
+
+`GET /auth/introspection`
+
+Introspection is a process when we request information about a certain token.
+
+#### Headers
+
+- `Authorization`: `{token_from_login_response}`
+
+#### Response
+
+- Returns a [User](#user) with the information of the token's owner.
+
+#### Example
+
+```
+// Request
+curl --location --request GET 'localhost:8000/auth/introspection' \
+--header 'Authorization: 54acf92e-247d-49d7-b2ae-955a678c9436'
+
+// Response
+200 OK
+{
+    "user_id": "222e3bf3-7900-48e1-9e96-bf4a16562ab7",
+    "groups": {},
+    "internal_permissions": [],
+    "eth_address": "test1234123123123123123",
+    "token": {
+        "token": "54acf92e-247d-49d7-b2ae-955a678c9436",
+        "expires_at": "2021-06-10T18:49:00.163140+00:00",
+        "valid": true
+    }
+}
+```
+
+### Create permission
+
+`POST /auth/permissions`
+
+Create permission endpoint. Name should be unique.
+It requires to have `manage_permissions` internal permission.
+
+#### Headers
+
+- `Authorization`: `{token_from_login_response}`
+
+#### Request
+
+- `name`: The name of the permission.
+
+#### Response 
+
+- `id`: ID of the new permission.
+- `name`: Name added by the creator.
+- `created_at`: Timestamp of the creation.
+
+#### Example
+
+```
+// Request
+curl --location --request POST 'localhost:8000/auth/permissions' \
+--header 'Authorization: c9e8b521-67c5-4088-82e4-16cff94ff40e' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "name": "test_WRITE"
+}'
+
+// Response
+200 OK
+{
+    "id": "23d0a33a-418e-413c-b45f-7c220deec16f",
+    "name": "test_WRITE",
+    "created_at": ...,
+}
+```
+
+### Create group
+
+`POST /auth/groups`
+
+Create group endpoint. Name should be unique.
+It requires to have `manage_groups` internal permission.
+
+#### Headers
+
+- `Authorization`: `{token_from_login_response}`
+
+#### Request
+
+- `name`: The name of the group.
+- `description`: The description of the group.
+
+#### Response
+
+- `id`: ID of the new group.
+- `name`: Name added by the creator.
+- `description`: Description added by the creator.
+- `created_at`: Timestamp of the creation.
+
+#### Example
+
+```
+// Request
+curl --location --request POST 'localhost:8000/auth/groups' \
+--header 'Authorization: c9e8b521-67c5-4088-82e4-16cff94ff40e' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "name": "test_WRITE",
+    "description": "shit Java"
+}'
+
+// Response
+200 OK
+{
+    "id": "af03c47b-7bb2-476b-9ec6-0ec45af2a1c2",
+    "name": "test_WRITE",
+    "description": "shit Java",
+    "created_at": {
+        "secs_since_epoch": 1623341618,
+        "nanos_since_epoch": 50303000
+    },
+    "deleted_at": null
+}
+```
+
+----------------------------------------------------------------
 
 ### Common structures
 
