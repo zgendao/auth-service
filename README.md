@@ -7,16 +7,16 @@ Generic authentication and authorization service based on Ethereum wallets
 ### Register Flow
 
 1. Someone who has permission, creates a [register token](#create-register-token-endpoint).
-2. User sign a string with the Wallet or Private Key and [send it alongside with the eth_address and register token](#register-endpoint).
-3. Final state, user created and logged in by the system. So returns the token. 
+2. User signs a string with the Wallet or Private Key and [sends it alongside with the eth_address and register token](#register-endpoint).
+3. Final state, when a user is created and logged in by the system. So it returns the token. 
 
 ### Login Flow
 
-1. User sign a string with the Wallet or Private Key and [send it alongside with the eth_address to the login endpoint](#login-endpoint).
+1. User signs a string with the Wallet or Private Key and [sends it alongside with the eth_address to the login endpoint](#login-endpoint).
 2. Returns the token and the information about the user.
-3. The user can use this token to authentication. The app which wants to authenticate the token will [send it to the introspection endpoint](#introspection).
+3. The user can use this token for authentication. The app which wants to authenticate the token will [send it to the introspection endpoint](#introspection).
 
-**NOTE: The "singed string" always MUST be te same.**
+**NOTE: The "signed string" MUST always be te same.**
 
 ## Endpoints
 
@@ -24,7 +24,7 @@ Generic authentication and authorization service based on Ethereum wallets
 
 `POST /auth/login`
 
-Main Login/Sign in endpoint. After the login there is the `token` field in the response. It should be used for authentication.
+Main Login/Sign in endpoint. After the login there is a `token` field in the response. It should be used for authentication.
 
 #### Request
 
@@ -83,7 +83,7 @@ curl --location --request POST 'localhost:8000/auth/login' \
 
 `POST /auth/tokens/register`
 
-Register token required for registration. So one of the member of the team can create a register token and send to the user securely, so it can register.
+Register token required for registration. A member of the team can create a register token and send it to the user securely, so it can register.
 It requires to have `manage_users` internal permission.
 
 #### Headers
@@ -94,7 +94,7 @@ It requires to have `manage_users` internal permission.
 
 - `token`: Register token, this should be sent to the user.
 - `expires_at`: Time when the token expires.
-- `valid`: Boolean which always `true` in this case.
+- `valid`: Boolean which is always `true` in this case.
 
 #### Example
 
@@ -116,9 +116,9 @@ curl --location --request POST 'localhost:8000/auth/tokens/register' \
 
 `POST /auth/register`
 
-After the user get the [register token](#create-register-token-endpoint) they can register. It can be done by sending the eth_address, and the signature alongside with the register token.
+After the user gets the [register token](#create-register-token-endpoint) they can register. It can be done by sending the eth_address, and the signature alongside with the register token.
 Note, that the register is very strict, the first action is always to delete the register token even if the registration NOT finished properly.
-After registration the system automatically log in the user.
+After registration the system automatically logs in the user.
 
 #### Request
 
@@ -407,7 +407,7 @@ curl --location --request PUT 'localhost:8000/auth/users/internal-permissions' \
 
 `POST /tokens/long`
 
-Act as an API token, should store it securely. Expires after a year.
+Acts as an API token, should be stored securely. Expires after a year.
 It requires to have `manage_long_token` internal permission.
 
 #### Headers
