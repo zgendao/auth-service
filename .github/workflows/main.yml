@@ -5,7 +5,6 @@ on:
     branches: [ main ]
 
 jobs:
-
   database:
    runs-on: ubuntu-latest
    steps:
@@ -24,9 +23,6 @@ jobs:
 
     - name: docker compose
       run: docker-compose -f docker-compose.yaml up -d
-
-    - name: list container
-      run: docker-compose ps
 
     - name: create db
       run: docker exec -it cockroachdb ./cockroach sql --insecure --execute "CREATE DATABASE IF NOT EXISTS auth_service;"
