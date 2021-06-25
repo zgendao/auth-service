@@ -25,7 +25,7 @@ jobs:
       run: docker-compose -f docker-compose.yaml up -d
 
     - name: create db
-      run: docker exec -it cockroachdb ./cockroach sql --insecure --execute "CREATE DATABASE IF NOT EXISTS auth_service;"
+      run: docker exec -i cockroachdb ./cockroach sql --insecure --execute "CREATE DATABASE IF NOT EXISTS auth_service;"
 
     - name: install diesel_cli
       uses: actions-rs/cargo@v1
