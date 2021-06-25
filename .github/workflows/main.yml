@@ -1,40 +1,18 @@
 name: CI
 
-on:
-  push:
-    branches: [ main ]
+on: push
 
 jobs:
-  database:
-   runs-on: ubuntu-latest
-   steps:
-    - uses: actions/checkout@v2
-    - name: Install latest nightly
-      uses: actions-rs/toolchain@v1
-      with:
-            toolchain: nightly
-            override: true
-            components: rustfmt, clippy
-
-    - name: build docker image
-      run: | 
-        sudo curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
-        sudo chmod +x /usr/local/bin/docker-compose
-
-    - name: docker compose
-      run: docker-compose -f docker-compose.yaml up -d
-
-    - name: create db
-      run: docker exec -i cockroachdb ./cockroach sql --insecure --execute "CREATE DATABASE IF NOT EXISTS auth_service;"
-
-    - name: install diesel_cli
-      uses: actions-rs/cargo@v1
-      with:
-        command: install
-        args: diesel_cli --no-default-features --features postgres
-
-    - name: migration
-      run: diesel migration run
+#   database:
+#    runs-on: ubuntu-latest
+#    steps:
+#     - uses: actions/checkout@v2
+#     - name: Install latest nightly
+#       uses: actions-rs/toolchain@v1
+#       with:
+#             toolchain: nightly
+#             override: true
+#             components: rustfmt, clippy
 
   cargo-test:
     runs-on: ubuntu-latest
@@ -46,6 +24,26 @@ jobs:
             toolchain: nightly
             override: true
             components: rustfmt, clippy
+            
+      - name: build docker image
+        run: | 
+          sudo curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: docker compose
+        run: docker-compose -f docker-compose.yaml up -d
+
+      - name: create db
+        run: docker exec -i cockroachdb ./cockroach sql --insecure --execute "CREATE DATABASE IF NOT EXISTS auth_service;"
+
+      - name: install diesel_cli
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: diesel_cli --no-default-features --features postgres
+
+      - name: migration
+        run: diesel migration run
 
       - name: cargo check
         uses: actions-rs/cargo@v1
@@ -69,7 +67,7 @@ jobs:
     name: format
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout sourves
+      - name: Checkout sources
         uses: actions/checkout@v2
 
       - name: Install latest nightly
